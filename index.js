@@ -112,10 +112,10 @@ class Aperture {
         reject(err);
       }, 10000);
 
-      this.recorder.catch(err => {
+      this.recorder.catch(error => {
         clearTimeout(timeout);
         delete this.recorder;
-        reject(err);
+        reject(error);
       });
 
       this.recorder.stdout.setEncoding('utf8');
