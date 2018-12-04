@@ -1,9 +1,10 @@
 <p align="center">
-  <img src="https://getkap.co/images/aperture.svg" height="64">
+  <img src="media/aperture-logo.svg" width="64" height="64">
   <h3 align="center">Aperture</h3>
   <p align="center">Record the screen on macOS</p>
   <p align="center"><a href="https://travis-ci.org/wulkano/aperture"><img src="https://travis-ci.org/wulkano/aperture.svg?branch=master" alt="Build Status: macOS"></a> <a href="https://github.com/sindresorhus/xo"><img src="https://img.shields.io/badge/code_style-XO-5ed9c7.svg" alt="XO code style"></a></p>
 </p>
+
 
 ## Install
 
