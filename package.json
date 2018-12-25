@@ -3,13 +3,13 @@
   "version": "5.1.0",
   "description": "Record the screen on macOS",
   "license": "MIT",
-  "repository": "wulkano/aperture",
+  "repository": "wulkano/aperture-node",
   "engines": {
     "node": ">=8"
   },
   "scripts": {
     "test": "xo && ava",
-    "build": "cd swift && xcodebuild archive -derivedDataPath $(mktemp -d) -scheme aperture",
+    "build": "swift build --configuration=release --static-swift-stdlib -Xswiftc '-target' -Xswiftc 'x86_64-apple-macosx10.12' && mv .build/release/aperture .",
     "prepublish": "npm run build"
   },
   "files": [

@@ -1,7 +1,7 @@
 <p align="center">
-  <img src="media/aperture-logo.svg" width="64" height="64">
-  <h3 align="center">Aperture</h3>
-  <p align="center">Record the screen on macOS</p>
+  <img src="https://rawcdn.githack.com/wulkano/Aperture/81451a3ec1a9d060f3625d6c31f4debc17b0c07d/media/aperture-logo.svg" width="64" height="64">
+  <h3 align="center">aperture-node</h3>
+  <p align="center">Record the screen on macOS from Node.js</p>
   <p align="center"><a href="https://travis-ci.org/wulkano/aperture"><img src="https://travis-ci.org/wulkano/aperture.svg?branch=master" alt="Build Status: macOS"></a> <a href="https://github.com/sindresorhus/xo"><img src="https://img.shields.io/badge/code_style-XO-5ed9c7.svg" alt="XO code style"></a></p>
 </p>
 
@@ -44,7 +44,7 @@ See [`example.js`](example.js) if you want to quickly try it out. *(The example 
 
 ## API
 
-### aperture.screens() -> `Promise<Array>`
+### aperture.screens() -> `Promise<Object[]>`
 
 Get a list of screens. The first screen is the primary screen.
 
@@ -57,7 +57,7 @@ Example:
 }]
 ```
 
-### aperture.audioDevices() -> `Promise<Array>`
+### aperture.audioDevices() -> `Promise<Object[]>`
 
 Get a list of audio devices.
 
@@ -171,20 +171,9 @@ Yes, we can, but the performance is terrible:
 ![aperture](https://cloud.githubusercontent.com/assets/4721750/19214743/11f4aaaa-8d61-11e6-9822-4e83bcdfab24.jpg)
 
 
-## Linux and Windows
+## Roadmap
 
-We want to bring Aperture to Linux and Windows, but we don't have time or resources for such tasks (we're Mac users), so **any help is more than welcome**. We just want to enforce two things: **performance** and **quality** – it doesn't matter how (`ffmpeg`, custom built native lib, etc) they are achieved.
-
-
-## Upcoming
-
-Aperture is in its early days. We're working on adding more features, such as *export to GIF*, compression options, support for multiple displays, support for audio, and much more. Check out our [Aperture](https://github.com/wulkano/kap/issues?q=is%3Aissue+is%3Aopen+label%3Aaperture) issues on **Kap** to learn more.
-
-
-## Maintainers
-
-- [Matheus Fernandes](https://github.com/matheuss)
-- [Sindre Sorhus](https://github.com/sindresorhus)
+We plan on adding more features, such as *export to GIF*, compression options, support for multiple displays, support for audio, and much more. Check out our [Aperture](https://github.com/wulkano/kap/issues?q=is%3Aissue+is%3Aopen+label%3Aaperture) issues on **Kap** to learn more.
 
 
 ## License

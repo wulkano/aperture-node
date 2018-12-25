@@ -1,5 +1,6 @@
 import Foundation
 import AVFoundation
+import Aperture
 
 struct Options: Decodable {
   let destination: URL

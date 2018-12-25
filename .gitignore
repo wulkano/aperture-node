@@ -1,7 +1,6 @@
 node_modules
 yarn.lock
-*.xcodeproj/*
-!*.xcodeproj/project.pbxproj
-!*.xcworkspace/contents.xcworkspacedata
-/swift/build
+/*.xcodeproj/*
+/.build
+/Packages
 /aperture

@@ -1,0 +1,16 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "Aperture",
+        "repositoryURL": "https://github.com/wulkano/Aperture",
+        "state": {
+          "branch": null,
+          "revision": "81451a3ec1a9d060f3625d6c31f4debc17b0c07d",
+          "version": "0.1.0"
+        }
+      }
+    ]
+  },
+  "version": 1
+}
