@@ -176,6 +176,11 @@ Yes, we can, but the performance is terrible:
 We plan on adding more features, such as *export to GIF*, compression options, support for multiple displays, support for audio, and much more. Check out our [Aperture](https://github.com/wulkano/kap/issues?q=is%3Aissue+is%3Aopen+label%3Aaperture) issues on **Kap** to learn more.
 
 
+## Related
+
+- [Aperture](https://github.com/wulkano/Aperture) - The Swift framework used in this package
+
+
 ## License
 
 MIT
