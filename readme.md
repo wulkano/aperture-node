@@ -156,7 +156,7 @@ The [`proRes422` and `proRes4444`](https://documentation.apple.com/en/finalcutpr
 
 ## Why
 
-Aperture was built to fulfill the needs of [Kap](https://github.com/wulkano/kap), providing a JavaScript interface to the **best** available method for recording the screen. That's why it's currently a wrapper for a [Swift script](swift/aperture/main.swift) that records the screen using the [AVFoundation framework](https://developer.apple.com/av-foundation/).
+Aperture was built to fulfill the needs of [Kap](https://github.com/wulkano/kap), providing a JavaScript interface to the **best** available method for recording the screen. That's why it's currently a wrapper for a [Swift script](Sources/ApertureCLI/main.swift) that records the screen using the [AVFoundation framework](https://developer.apple.com/av-foundation/).
 
 #### But you can use `ffmpeg -f avfoundation...`
 
