@@ -41,7 +41,7 @@ See [`example.js`](example.js) if you want to quickly try it out. *(The example 
 
 ## API
 
-### aperture.screens() -> `Promise<Object[]>`
+#### aperture.screens() -> `Promise<Object[]>`
 
 Get a list of screens. The first screen is the primary screen.
 
@@ -54,7 +54,7 @@ Example:
 }]
 ```
 
-### aperture.audioDevices() -> `Promise<Object[]>`
+#### aperture.audioDevices() -> `Promise<Object[]>`
 
 Get a list of audio devices.
 
@@ -67,7 +67,7 @@ Example:
 }]
 ```
 
-### aperture.videoCodecs -> `Map`
+#### aperture.videoCodecs -> `Map`
 
 Get a list of available video codecs. The key is the `videoCodec` option name and the value is the codec name. It only returns `hevc` if you're on macOS 10.13 or newer and your computer supports HEVC hardware encoding.
 
@@ -82,42 +82,42 @@ Map {
 }
 ```
 
-### recorder = `aperture()`
+#### recorder = `aperture()`
 
-### recorder.startRecording([[options]](#options))
+#### recorder.startRecording([[options]](#options))
 
 Returns a `Promise` for the path to the screen recording file.
 
 Fullfills when the recording starts or rejects if the recording didn't start after 5 seconds.
 
-### recorder.stopRecording()
+#### recorder.stopRecording()
 
 Returns a `Promise` for the path to the screen recording file.
 
-#### options
+## Options
 
-##### fps
+#### fps
 
 Type: `number`<br>
 Default: `30`
 
 Number of frames per seconds.
 
-##### cropArea
+#### cropArea
 
 Type: `Object`<br>
 Default: `undefined`
 
 Record only an area of the screen. Accepts an object with `x`, `y`, `width`, `height` properties.
 
-##### showCursor
+#### showCursor
 
 Type: `boolean`<br>
 Default: `true`
 
 Show the cursor in the screen recording.
 
-##### highlightClicks
+#### highlightClicks
 
 Type: `boolean`<br>
 Default: `false`
@@ -126,21 +126,21 @@ Highlight cursor clicks in the screen recording.
 
 Enabling this will also enable the `showCursor` option.
 
-##### screenId
+#### screenId
 
 Type: `number`<br>
 Default: `aperture.screens()[0]` *(Primary screen)*
 
 Screen to record.
 
-##### audioDeviceId
+#### audioDeviceId
 
 Type: `string`<br>
 Default: `undefined`
 
 Audio device to include in the screen recording. Should be one of the `id`'s from `aperture.audioDevices()`.
 
-##### videoCodec
+#### videoCodec
 
 Type: `string`<br>
 Default: `h264`<br>
@@ -166,11 +166,6 @@ Yes, we can, but the performance is terrible:
 ##### Recording the entire screen with Aperture:
 
 ![aperture](https://cloud.githubusercontent.com/assets/4721750/19214743/11f4aaaa-8d61-11e6-9822-4e83bcdfab24.jpg)
-
-
-## Roadmap
-
-We plan on adding more features, such as *export to GIF*, compression options, support for multiple displays, support for audio, and much more. Check out our [Aperture](https://github.com/wulkano/kap/issues?q=is%3Aissue+is%3Aopen+label%3Aaperture) issues on **Kap** to learn more.
 
 
 ## Related
