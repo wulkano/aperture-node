@@ -182,3 +182,9 @@ Object.defineProperty(module.exports, 'videoCodecs', {
     return codecs;
   }
 });
+
+Object.defineProperty(module.exports, 'supportsHevcHardwareEncoding', {
+  get() {
+    return supportsHevcHardwareEncoding;
+  }
+});
