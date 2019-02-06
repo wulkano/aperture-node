@@ -84,9 +84,7 @@ Map {
 
 #### aperture.supportsHevcHardwareEncoding -> `boolean`
 
-Check if your computer supports HEVC hardware encoding
-
-Returns `true` or `false`
+Check if your computer supports HEVC hardware encoding.
 
 #### recorder = `aperture()`
 
