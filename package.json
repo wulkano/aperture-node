@@ -17,18 +17,18 @@
     "aperture"
   ],
   "dependencies": {
-    "electron-util": "^0.10.2",
+    "electron-util": "^0.11.0",
     "execa": "^1.0.0",
     "file-url": "^2.0.2",
     "macos-version": "^5.0.0",
     "tempy": "^0.2.1"
   },
   "devDependencies": {
-    "ava": "^1.0.1",
+    "ava": "^1.2.1",
     "delay": "^4.1.0",
-    "file-type": "^10.7.0",
+    "file-type": "^10.8.0",
     "read-chunk": "^3.0.0",
-    "xo": "^0.23.0"
+    "xo": "^0.24.0"
   },
   "xo": {
     "space": true
