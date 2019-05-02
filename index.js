@@ -38,7 +38,8 @@ class Aperture {
     highlightClicks = false,
     screenId = 0,
     audioDeviceId = undefined,
-    videoCodec = undefined
+    videoCodec = undefined,
+    destinationPath = undefined
   } = {}) {
     return new Promise((resolve, reject) => {
       if (this.recorder !== undefined) {
@@ -46,7 +47,7 @@ class Aperture {
         return;
       }
 
-      this.tmpPath = tempy.file({extension: 'mp4'});
+      this.destinationPath = destinationPath || tempy.file({extension: 'mp4'});
 
       if (highlightClicks === true) {
         showCursor = true;
@@ -63,7 +64,7 @@ class Aperture {
       }
 
       const recorderOpts = {
-        destination: fileUrl(this.tmpPath),
+        destination: fileUrl(this.destinationPath),
         framesPerSecond: fps,
         showCursor,
         highlightClicks,
@@ -125,7 +126,7 @@ class Aperture {
         if (data.trim() === 'R') {
           // `R` is printed by Swift when the recording **actually** starts
           clearTimeout(timeout);
-          resolve(this.tmpPath);
+          resolve(this.destinationPath);
         }
       });
     });
@@ -140,7 +141,7 @@ class Aperture {
     await this.recorder;
     delete this.recorder;
 
-    return this.tmpPath;
+    return this.destinationPath;
   }
 }
 
