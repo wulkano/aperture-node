@@ -110,7 +110,7 @@ class Aperture {
         this.recorder.kill();
         delete this.recorder;
         reject(err);
-      }, 10000);
+      }, 5000);
 
       this.recorder.catch(error => {
         clearTimeout(timeout);
