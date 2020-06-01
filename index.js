@@ -49,7 +49,7 @@ class Aperture {
 
       this.tmpPath = destination ? destination : tempy.file({extension: 'mp4'});
       
-      if (destination && (typeof destination !== 'string' || !destination.includes('mp4')) {
+      if (destination && (typeof destination !== 'string' || !destination.includes('mp4'))) {
         reject(new Error('Invalid `destination` option string'));
         return;
       }
