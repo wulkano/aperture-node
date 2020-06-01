@@ -20,6 +20,7 @@ const aperture = require('aperture')();
 
 const options = {
   fps: 30,
+  destination: '/private/var/folders/3x/myVideo.mp4',
   cropArea: {
     x: 100,
     y: 100,
@@ -32,7 +33,7 @@ const options = {
   await aperture.startRecording(options);
   await delay(3000);
   console.log(await aperture.stopRecording());
-  //=> '/private/var/folders/3x/jf5977fn79jbglr7rk0tq4d00000gn/T/cdf4f7df426c97880f8c10a1600879f7.mp4'
+  //=> '/private/var/folders/3x/myVideo.mp4'
 })();
 ```
 
@@ -95,6 +96,13 @@ Fullfills when the recording starts or rejects if the recording didn't start aft
 Returns a `Promise` for the path to the screen recording file.
 
 ## Options
+
+#### destination
+
+Type: `string`<br>
+Default: `undefined`
+
+Destination of the output file. When `undefined`, destination will be generated.
 
 #### fps
 
