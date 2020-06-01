@@ -1,3 +1,4 @@
+
 # aperture-node [![Build Status](https://travis-ci.org/wulkano/aperture-node.svg?branch=master)](https://travis-ci.org/wulkano/aperture-node)
 
 > Record the screen on macOS from Node.js
@@ -89,7 +90,7 @@ Map {
 
 Returns a `Promise` for the path to the screen recording file.
 
-Fullfills when the recording starts or rejects if the recording didn't start after 5 seconds.
+Fulfills when the recording starts or rejects if the recording didn't start after 5 seconds.
 
 #### recorder.stopRecording()
 
@@ -102,7 +103,11 @@ Returns a `Promise` for the path to the screen recording file.
 Type: `string`<br>
 Default: `undefined`
 
-Destination of the output file. When `undefined`, destination will be generated.
+Destination of the output file. When `undefined`, destination will be generated using [tempy](https://github.com/sindresorhus/tempy) (default).
+
+`destinationPath` should only be used when necessary. [tempy](https://github.com/sindresorhus/tempy) is used to generate an available filename and path in the user's temporary directory, eg. `/private/var/folders/3x/jf5977fn79j/T/vid.mp4`.
+
+`destinationPath` can be useful when needing to store temporary data on a different external network or local drive, allowing for higher capacity file storage ([further discussion](https://github.com/wulkano/aperture-node/pull/7#issuecomment-533199701)).
 
 #### fps
 
