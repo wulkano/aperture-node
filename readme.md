@@ -20,7 +20,7 @@ const aperture = require('aperture')();
 
 const options = {
   fps: 30,
-  destination: '/private/var/folders/3x/myVideo.mp4',
+  destinationPath: '/private/var/folders/3x/myVideo.mp4',
   cropArea: {
     x: 100,
     y: 100,
@@ -97,7 +97,7 @@ Returns a `Promise` for the path to the screen recording file.
 
 ## Options
 
-#### destination
+#### destinationPath
 
 Type: `string`<br>
 Default: `undefined`

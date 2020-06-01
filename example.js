@@ -9,7 +9,7 @@ async function main() {
   console.log('Audio devices:', await aperture.audioDevices());
   console.log('Preparing to record for 5 seconds');
   await recorder.startRecording({
-    destination: path.join(__dirname, 'test.mp4')
+    destinationPath: path.join(__dirname, 'test.mp4')
   });
   console.log('Recording started');
   await delay(5000);
