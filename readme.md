@@ -21,7 +21,6 @@ const aperture = require('aperture')();
 
 const options = {
   fps: 30,
-  destinationPath: '/private/var/folders/3x/myVideo.mp4',
   cropArea: {
     x: 100,
     y: 100,
@@ -34,7 +33,7 @@ const options = {
   await aperture.startRecording(options);
   await delay(3000);
   console.log(await aperture.stopRecording());
-  //=> '/private/var/folders/3x/myVideo.mp4'
+  //=> '/private/var/folders/3x/jf5977fn79j/T/cdf4f7df426c97880f8c10a1600879f7.mp4'
 })();
 ```
 
