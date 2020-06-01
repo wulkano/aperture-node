@@ -104,9 +104,9 @@ Default: `undefined`
 
 Destination of the output file. When `undefined`, destination will be generated using [tempy](https://github.com/sindresorhus/tempy) (default).
 
-`destinationPath` can be useful when needing to store temporary data on a different external network or local drive, allowing for higher capacity file storage ([further discussion](https://github.com/wulkano/aperture-node/pull/7#issuecomment-533199701)).
+`destinationPath` can be useful when needing to store temporary data on a different external network or local drive, allowing for higher capacity file storage ([further discussion](https://github.com/wulkano/aperture-node/pull/7#issuecomment-533199701)). 
 
-`destinationPath` should only be used when necessary. If `destinationPath` is not defined, then [tempy](https://github.com/sindresorhus/tempy) is used to generate an available filename and path in the user's temporary directory, eg. `/private/var/folders/3x/jf5977fn79j/T/vid.mp4`.
+This option should only be used when necessary. If `destinationPath` is not defined, then [tempy](https://github.com/sindresorhus/tempy) is used to generate an available filename and path in the user's temporary directory, eg. `/private/var/folders/3x/jf5977fn79j/T/vid.mp4`.
 
 #### fps
 
