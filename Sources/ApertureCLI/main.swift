@@ -14,6 +14,8 @@ struct Options: Decodable {
 }
 
 func record() throws {
+  setbuf(__stdoutp, nil)
+
   let options: Options = try CLI.arguments.first!.jsonDecoded()
 
   let recorder = try Aperture(
@@ -26,10 +28,6 @@ func record() throws {
     audioDevice: options.audioDeviceId != nil ? AVCaptureDevice(uniqueID: options.audioDeviceId!) : nil,
     videoCodec: options.videoCodec
   )
-
-  recorder.onStart = {
-    print("R")
-  }
 
   recorder.onFinish = {
     exit(0)
@@ -48,7 +46,9 @@ func record() throws {
 
   recorder.start()
 
-  setbuf(__stdoutp, nil)
+  // Inform the Node.js code that the recording has started.
+  print("R")
+
   RunLoop.main.run()
 }
 

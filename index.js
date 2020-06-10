@@ -40,6 +40,7 @@ class Aperture {
     audioDeviceId = undefined,
     videoCodec = undefined
   } = {}) {
+    console.log('1', new Date());
     return new Promise((resolve, reject) => {
       if (this.recorder !== undefined) {
         reject(new Error('Call `.stopRecording()` first'));
@@ -123,6 +124,7 @@ class Aperture {
         debuglog(data);
 
         if (data.trim() === 'R') {
+          console.log('2', new Date());
           // `R` is printed by Swift when the recording **actually** starts
           clearTimeout(timeout);
           resolve(this.tmpPath);
