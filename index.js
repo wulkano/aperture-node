@@ -128,6 +128,24 @@ class Aperture {
           // `R` is printed by Swift when the recording **actually** starts
           clearTimeout(timeout);
           resolve(this.tmpPath);
+
+
+          // Start printing how many seconds have passed since
+          // the promise resolved, (every 0.1s) for 3 seconds
+          // Then, we can check the resulting recording to see the first
+          // number of these printed
+          const startDate = new Date();
+          const print = () => {
+            const diff = new Date() - startDate
+            console.log(diff/1000);
+
+            if (diff < 3000) {
+              setTimeout(print, 100);
+            }
+          };
+          print();
+
+
         }
       });
     });
