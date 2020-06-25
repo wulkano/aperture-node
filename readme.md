@@ -150,6 +150,12 @@ The `hevc` codec requires macOS 10.13 or newer. A computer with Intel 6th genera
 
 The [`proRes422` and `proRes4444`](https://documentation.apple.com/en/finalcutpro/professionalformatsandworkflows/index.html#chapter=10%26section=2%26tasks=true) codecs are uncompressed data. They will create huge files.
 
+#### filePath
+
+Type: `string`<br>
+Default: `undefined`<br>
+
+A file path with a `.mp4` extension where the recording will be saved. If not provided, a temporary path will be used instead.
 
 ## Why
 

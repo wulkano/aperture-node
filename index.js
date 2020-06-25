@@ -38,7 +38,8 @@ class Aperture {
     highlightClicks = false,
     screenId = 0,
     audioDeviceId = undefined,
-    videoCodec = undefined
+    videoCodec = undefined,
+    filePath = undefined
   } = {}) {
     return new Promise((resolve, reject) => {
       if (this.recorder !== undefined) {
@@ -46,7 +47,12 @@ class Aperture {
         return;
       }
 
-      this.tmpPath = tempy.file({extension: 'mp4'});
+      if (filePath && path.extname(filePath) !== '.mp4') {
+        reject(new Error('`filePath` needs to have a .mp4 extension'));
+        return;
+      }
+
+      this.tmpPath = filePath || tempy.file({extension: 'mp4'});
 
       if (highlightClicks === true) {
         showCursor = true;
