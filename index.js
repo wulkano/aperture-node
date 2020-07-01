@@ -42,7 +42,7 @@ class Aperture {
     audioDeviceId = undefined,
     videoCodec = undefined
   } = {}) {
-    this.processId = 'asd';//getRandomId();
+    this.processId = getRandomId();
     return new Promise((resolve, reject) => {
       if (this.recorder !== undefined) {
         reject(new Error('Call `.stopRecording()` first'));
