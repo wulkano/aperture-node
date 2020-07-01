@@ -29,6 +29,10 @@ func record() throws {
     videoCodec: options.videoCodec
   )
 
+  recorder.onStart = {
+    print("FR")
+  }
+
   recorder.onFinish = {
     exit(0)
   }

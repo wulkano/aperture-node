@@ -40,7 +40,6 @@ class Aperture {
     audioDeviceId = undefined,
     videoCodec = undefined
   } = {}) {
-    console.log('1', new Date());
     return new Promise((resolve, reject) => {
       if (this.recorder !== undefined) {
         reject(new Error('Call `.stopRecording()` first'));
@@ -119,33 +118,25 @@ class Aperture {
         reject(error);
       });
 
+      this.isFileReady = new Promise(resolve => {
+        this._fileReadyResolve = resolve;
+      });
+
       this.recorder.stdout.setEncoding('utf8');
       this.recorder.stdout.on('data', data => {
         debuglog(data);
 
-        if (data.trim() === 'R') {
-          console.log('2', new Date());
-          // `R` is printed by Swift when the recording **actually** starts
+        const trimmed = data.trim();
+
+        if (trimmed === 'R') {
+          // `R` is printed by Swift about a second before the recording **actually** starts
           clearTimeout(timeout);
-          resolve(this.tmpPath);
-
-
-          // Start printing how many seconds have passed since
-          // the promise resolved, (every 0.1s) for 3 seconds
-          // Then, we can check the resulting recording to see the first
-          // number of these printed
-          const startDate = new Date();
-          const print = () => {
-            const diff = new Date() - startDate
-            console.log(diff/1000);
-
-            if (diff < 3000) {
-              setTimeout(print, 100);
-            }
-          };
-          print();
-
-
+          setTimeout(resolve, 1000);
+        } else if (trimmed === 'FR') {
+          // `FR` is printed by Swift when the the recording file is ready
+          if (this._fileReadyResolve) {
+            this._fileReadyResolve(this.tmpPath);
+          }
         }
       });
     });
@@ -159,6 +150,8 @@ class Aperture {
     this.recorder.kill();
     await this.recorder;
     delete this.recorder;
+    delete this._fileReadyResolve;
+    delete this.isFileReady;
 
     return this.tmpPath;
   }
