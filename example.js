@@ -7,9 +7,12 @@ async function main() {
   const recorder = aperture();
   console.log('Screens:', await aperture.screens());
   console.log('Audio devices:', await aperture.audioDevices());
+
   console.log('Preparing to record for 5 seconds');
   await recorder.startRecording();
   console.log('Recording started');
+  await recorder.isFileReady
+  console.log('File is ready');
   await delay(5000);
   const fp = await recorder.stopRecording();
   fs.renameSync(fp, 'recording.mp4');

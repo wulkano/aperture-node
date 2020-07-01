@@ -10,6 +10,8 @@ const electronUtil = require('electron-util/node');
 
 const debuglog = util.debuglog('aperture');
 
+const getRandomId = () => Math.random().toString(36).substring(2, 15);
+
 // Workaround for https://github.com/electron/electron/issues/9459
 const BIN = path.join(electronUtil.fixPathForAsarUnpack(__dirname), 'aperture');
 
@@ -40,6 +42,7 @@ class Aperture {
     audioDeviceId = undefined,
     videoCodec = undefined
   } = {}) {
+    this.processId = 'asd';//getRandomId();
     return new Promise((resolve, reject) => {
       if (this.recorder !== undefined) {
         reject(new Error('Call `.stopRecording()` first'));
@@ -97,7 +100,15 @@ class Aperture {
         recorderOpts.videoCodec = codecMap.get(videoCodec);
       }
 
-      this.recorder = execa(BIN, [JSON.stringify(recorderOpts)]);
+      this.recorder = execa(
+        BIN, [
+          'record',
+          '--process-id', this.processId,
+          JSON.stringify(recorderOpts)
+        ]
+      );
+
+      this.isFileReady = this.waitForEvent('onFileReady')
 
       const timeout = setTimeout(() => {
         // `.stopRecording()` was called already
@@ -119,16 +130,56 @@ class Aperture {
       });
 
       this.recorder.stdout.setEncoding('utf8');
-      this.recorder.stdout.on('data', data => {
-        debuglog(data);
+      this.recorder.stdout.on('data', debuglog);
 
-        if (data.trim() === 'R') {
-          // `R` is printed by Swift when the recording **actually** starts
-          clearTimeout(timeout);
-          resolve(this.tmpPath);
-        }
+      this.waitForEvent('onStart').then(() => {
+        clearTimeout(timeout);
+        resolve(this.tmpPath);
       });
     });
+  }
+
+  async waitForEvent(name, parse) {
+    const {stdout} = await execa(
+      BIN, [
+        'events',
+        'listen',
+        '--process-id', this.processId,
+        '--exit',
+        name
+      ]
+    );
+
+    if (parse) {
+      return parse(stdout.trim())
+    }
+  }
+
+  async sendEvent(name, parse) {
+    const {stdout} = await execa(
+      BIN, [
+        'events',
+        'send',
+        '--process-id', this.processId,
+        name
+      ]
+    );
+
+    if (parse) {
+      return parse(stdout.trim())
+    }
+  }
+
+  async pause() {
+    return this.sendEvent('pause');
+  }
+
+  async resume() {
+    return this.sendEvent('resume');
+  }
+
+  async isPaused() {
+    return this.sendEvent('isPaused', val => val === 'true')
   }
 
   async stopRecording() {
@@ -147,7 +198,7 @@ class Aperture {
 module.exports = () => new Aperture();
 
 module.exports.screens = async () => {
-  const stderr = await execa.stderr(BIN, ['list-screens']);
+  const stderr = await execa.stderr(BIN, ['list', 'screens']);
 
   try {
     return JSON.parse(stderr);
@@ -157,7 +208,7 @@ module.exports.screens = async () => {
 };
 
 module.exports.audioDevices = async () => {
-  const stderr = await execa.stderr(BIN, ['list-audio-devices']);
+  const stderr = await execa.stderr(BIN, ['list', 'audio-devices']);
 
   try {
     return JSON.parse(stderr);

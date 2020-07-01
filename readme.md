@@ -86,9 +86,29 @@ Map {
 
 #### recorder.startRecording([[options]](#options))
 
-Returns a `Promise` for the path to the screen recording file.
+Returns a `Promise` that fullfills when the recording starts or rejects if the recording didn't start after 5 seconds.
 
-Fullfills when the recording starts or rejects if the recording didn't start after 5 seconds.
+#### recorder.isFileReady
+
+`Promise` that fullfills with the path to the screen recording file when it's ready.
+
+Fullfills when the recording starts or rejects if the recording didn't start after 5 seconds.	Only available while a recording is happening, `undefined` otherwise.
+
+#### recorder.pause()
+
+Pauses the recording. To resume, call `recorder.resume()`.
+
+Returns a `Promise` that fullfills when the recording has been paused.
+
+#### recorder.resume()
+
+Resumes the recording if it's been paused.
+
+Returns a `Promise` that fullfills when the recording has been resumed.
+
+#### recorder.isPaused()
+
+Returns a `Promise` that resolves with a boolean indicating whether or not the recording is currently paused.
 
 #### recorder.stopRecording()
 

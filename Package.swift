@@ -1,4 +1,4 @@
-// swift-tools-version:5.2
+// swift-tools-version:5.1
 import PackageDescription
 
 let package = Package(
@@ -15,13 +15,15 @@ let package = Package(
     )
   ],
   dependencies: [
-    .package(url: "https://github.com/wulkano/Aperture", from: "0.2.0")
+    .package(url: "https://github.com/wulkano/Aperture", from: "0.2.0"),
+    .package(url: "https://github.com/apple/swift-argument-parser", from: "0.1.0")
   ],
   targets: [
     .target(
       name: "ApertureCLI",
       dependencies: [
-        "Aperture"
+        "Aperture",
+        .product(name: "ArgumentParser", package: "swift-argument-parser")
       ]
     )
   ]
