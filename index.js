@@ -7,6 +7,7 @@ const tempy = require('tempy');
 const macosVersion = require('macos-version');
 const fileUrl = require('file-url');
 const electronUtil = require('electron-util/node');
+const delay = require('delay');
 
 const debuglog = util.debuglog('aperture');
 
@@ -43,7 +44,7 @@ class Aperture {
     videoCodec = undefined
   } = {}) {
     this.processId = getRandomId();
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       if (this.recorder !== undefined) {
         reject(new Error('Call `.stopRecording()` first'));
         return;
@@ -103,12 +104,13 @@ class Aperture {
       this.recorder = execa(
         BIN, [
           'record',
-          '--process-id', this.processId,
+          '--process-id',
+          this.processId,
           JSON.stringify(recorderOpts)
         ]
       );
 
-      this.isFileReady = this.waitForEvent('onFileReady')
+      this.isFileReady = this.waitForEvent('onFileReady');
 
       const timeout = setTimeout(() => {
         // `.stopRecording()` was called already
@@ -132,10 +134,9 @@ class Aperture {
       this.recorder.stdout.setEncoding('utf8');
       this.recorder.stdout.on('data', debuglog);
 
-      this.waitForEvent('onStart').then(() => {
-        clearTimeout(timeout);
-        resolve(this.tmpPath);
-      });
+      await this.waitForEvent('onStart');
+      clearTimeout(timeout);
+      setTimeout(() => resolve(this.tmpPath), 1000);
     });
   }
 
@@ -144,14 +145,15 @@ class Aperture {
       BIN, [
         'events',
         'listen',
-        '--process-id', this.processId,
+        '--process-id',
+        this.processId,
         '--exit',
         name
       ]
     );
 
     if (parse) {
-      return parse(stdout.trim())
+      return parse(stdout.trim());
     }
   }
 
@@ -160,13 +162,14 @@ class Aperture {
       BIN, [
         'events',
         'send',
-        '--process-id', this.processId,
+        '--process-id',
+        this.processId,
         name
       ]
     );
 
     if (parse) {
-      return parse(stdout.trim())
+      return parse(stdout.trim());
     }
   }
 
@@ -175,11 +178,13 @@ class Aperture {
   }
 
   async resume() {
-    return this.sendEvent('resume');
+    await this.sendEvent('resume');
+    // It takes about 1s after the promise resolves for the recording to actually start
+    await delay(1000);
   }
 
   async isPaused() {
-    return this.sendEvent('isPaused', val => val === 'true')
+    return this.sendEvent('isPaused', val => val === 'true');
   }
 
   async stopRecording() {
