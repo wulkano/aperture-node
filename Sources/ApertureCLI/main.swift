@@ -40,7 +40,7 @@ extension ApertureCLI {
   struct Record: ParsableCommand {
     static var configuration = CommandConfiguration(abstract: "Start a recording with the given options.")
 
-    @Option(name: .shortAndLong, default: "main", help: "The id to use for this process")
+    @Option(name: .shortAndLong, default: "main", help: "The ID to use for this process")
     var processId: String
 
     @Argument(help: "Stringified JSON object with options passed to Aperture")
@@ -85,7 +85,7 @@ extension ApertureCLI.Events {
     @Flag(default: true, inversion: .prefixedNo, help: "Wait for event to be received")
     var wait: Bool
 
-    @Option(name: .shortAndLong, default: "main", help: "The id of the target process")
+    @Option(name: .shortAndLong, default: "main", help: "The ID of the target process")
     var processId: String
 
     @Argument(help: "Name of the event to send. Can be one of:\n\(InEvent.toStringArray())")
@@ -115,7 +115,7 @@ extension ApertureCLI.Events {
     @Flag(help: "Exit after receiving the event once")
     var exit: Bool
 
-    @Option(name: .shortAndLong, default: "main", help: "The id of the target process")
+    @Option(name: .shortAndLong, default: "main", help: "The ID of the target process")
     var processId: String
 
     @Argument(help: "Name of the event to listen for. Can be one of:\n\(OutEvent.toStringArray())")
@@ -140,7 +140,7 @@ extension ApertureCLI.Events {
   struct ListenAll: ParsableCommand {
     static var configuration = CommandConfiguration(abstract: "Listen to all outcoming events for the given process.")
 
-    @Option(name: .shortAndLong, default: "main", help: "The id of the target process")
+    @Option(name: .shortAndLong, default: "main", help: "The ID of the target process")
     var processId: String
 
     func run() {
