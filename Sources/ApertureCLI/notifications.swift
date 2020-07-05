@@ -1,8 +1,8 @@
 import Foundation
 
-class ApertureNotification {
+final class ApertureNotification {
   private var notification: Notification
-  var isAnswered: Bool = false
+  var isAnswered = false
 
   init(_ notification: Notification) {
     self.notification = notification
@@ -29,14 +29,14 @@ class ApertureNotification {
       return
     }
 
-    var payload: [AnyHashable: Any] = [:]
+    var payload = [AnyHashable: Any]()
 
     if data != nil {
       payload["data"] = "\(data!)"
     }
 
     DistributedNotificationCenter.default().postNotificationName(
-      NSNotification.Name(responseName!),
+      .Name(responseName!),
       object: nil,
       userInfo: payload,
       deliverImmediately: true
@@ -50,7 +50,7 @@ func answerEvent(
   using handler: @escaping (ApertureNotification) -> Void
 ) -> NSObjectProtocol {
   return DistributedNotificationCenter.default().addObserver(
-    forName: NSNotification.Name("aperture.\(processId).\(event)"),
+    forName: .Name("aperture.\(processId).\(event)"),
     object: nil,
     queue: nil
   ) { notification in
@@ -80,7 +80,7 @@ func sendEvent(
   var observer: Any?
 
   observer = DistributedNotificationCenter.default().addObserver(
-    forName: NSNotification.Name(responseName),
+    forName: .Name(responseName),
     object: nil,
     queue: nil
   ) { notification in
@@ -89,7 +89,7 @@ func sendEvent(
   }
 
   DistributedNotificationCenter.default().postNotificationName(
-    NSNotification.Name("aperture.\(processId).\(event)"),
+    .Name("aperture.\(processId).\(event)"),
     object: nil,
     userInfo: payload,
     deliverImmediately: true
