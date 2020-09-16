@@ -90,9 +90,11 @@ Returns a `Promise` that fullfills when the recording starts or rejects if the r
 
 #### recorder.isFileReady
 
-`Promise` that fullfills with the path to the screen recording file when it's ready.
+`Promise` that fullfills with the path to the screen recording file when it's ready. This will never reject.
 
 Only available while a recording is happening, `undefined` otherwise.
+
+Usually, this resolves around 1 second before the recording starts, but that's not guaranteed.
 
 #### recorder.stopRecording()
 
