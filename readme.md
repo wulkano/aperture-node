@@ -86,9 +86,15 @@ Map {
 
 #### recorder.startRecording([[options]](#options))
 
-Returns a `Promise` for the path to the screen recording file.
+Returns a `Promise` that fullfills when the recording starts or rejects if the recording didn't start after 5 seconds.
 
-Fullfills when the recording starts or rejects if the recording didn't start after 5 seconds.
+#### recorder.isFileReady
+
+`Promise` that fullfills with the path to the screen recording file when it's ready. This will never reject.
+
+Only available while a recording is happening, `undefined` otherwise.
+
+Usually, this resolves around 1 second before the recording starts, but that's not guaranteed.
 
 #### recorder.stopRecording()
 

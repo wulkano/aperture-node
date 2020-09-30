@@ -118,14 +118,25 @@ class Aperture {
         reject(error);
       });
 
+      this.isFileReady = new Promise(resolve => {
+        this._fileReadyResolve = resolve;
+      });
+
       this.recorder.stdout.setEncoding('utf8');
       this.recorder.stdout.on('data', data => {
         debuglog(data);
 
-        if (data.trim() === 'R') {
-          // `R` is printed by Swift when the recording **actually** starts
+        const trimmed = data.trim();
+
+        if (trimmed === 'R') {
+          // `R` is printed by Swift about a second before the recording **actually** starts
           clearTimeout(timeout);
-          resolve(this.tmpPath);
+          setTimeout(resolve, 1000);
+        } else if (trimmed === 'FR') {
+          // `FR` is printed by Swift when the the recording file is ready
+          if (this._fileReadyResolve) {
+            this._fileReadyResolve(this.tmpPath);
+          }
         }
       });
     });
@@ -139,6 +150,8 @@ class Aperture {
     this.recorder.kill();
     await this.recorder;
     delete this.recorder;
+    delete this._fileReadyResolve;
+    delete this.isFileReady;
 
     return this.tmpPath;
   }
