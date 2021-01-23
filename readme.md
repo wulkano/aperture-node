@@ -1,4 +1,4 @@
-# aperture-node [![Build Status](https://travis-ci.org/wulkano/aperture-node.svg?branch=master)](https://travis-ci.org/wulkano/aperture-node)
+# aperture-node [![Build Status](https://travis-ci.org/wulkano/aperture-node.svg?branch=main)](https://travis-ci.org/wulkano/aperture-node)
 
 > Record the screen on macOS from Node.js
 
