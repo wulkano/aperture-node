@@ -1,7 +1,6 @@
-# aperture-node [![Build Status](https://travis-ci.org/wulkano/aperture-node.svg?branch=main)](https://travis-ci.org/wulkano/aperture-node)
+# aperture-node
 
 > Record the screen on macOS from Node.js
-
 
 ## Install
 
@@ -10,7 +9,6 @@ $ npm install aperture
 ```
 
 *Requires macOS 10.12 or later.*
-
 
 ## Usage
 
@@ -37,7 +35,6 @@ const options = {
 ```
 
 See [`example.js`](example.js) if you want to quickly try it out. *(The example requires Node.js 8+)*
-
 
 ## API
 
@@ -84,7 +81,7 @@ Map {
 
 #### recorder = `aperture()`
 
-#### recorder.startRecording([[options]](#options))
+#### recorder.startRecording([options?](#options))
 
 Returns a `Promise` that fullfills when the recording starts or rejects if the recording didn't start after 5 seconds.
 
@@ -102,30 +99,32 @@ Returns a `Promise` for the path to the screen recording file.
 
 ## Options
 
+Type: `object`
+
 #### fps
 
-Type: `number`<br>
+Type: `number`\
 Default: `30`
 
 Number of frames per seconds.
 
 #### cropArea
 
-Type: `Object`<br>
+Type: `object`\
 Default: `undefined`
 
 Record only an area of the screen. Accepts an object with `x`, `y`, `width`, `height` properties.
 
 #### showCursor
 
-Type: `boolean`<br>
+Type: `boolean`\
 Default: `true`
 
 Show the cursor in the screen recording.
 
 #### highlightClicks
 
-Type: `boolean`<br>
+Type: `boolean`\
 Default: `false`
 
 Highlight cursor clicks in the screen recording.
@@ -134,28 +133,27 @@ Enabling this will also enable the `showCursor` option.
 
 #### screenId
 
-Type: `number`<br>
+Type: `number`\
 Default: `aperture.screens()[0]` *(Primary screen)*
 
 Screen to record.
 
 #### audioDeviceId
 
-Type: `string`<br>
+Type: `string`\
 Default: `undefined`
 
 Audio device to include in the screen recording. Should be one of the `id`'s from `aperture.audioDevices()`.
 
 #### videoCodec
 
-Type: `string`<br>
-Default: `h264`<br>
-Values: `hevc` `h264` `proRes422` `proRes4444`
+Type: `string`\
+Default: `'h264'`\
+Values: `'hevc' | 'h264' | 'proRes422' | 'proRes4444'`
 
 The `hevc` codec requires macOS 10.13 or newer. A computer with Intel 6th generation processor or newer is strongly recommended, as otherwise it will use software encoding, which only produces 3 FPS fullscreen recording.
 
 The [`proRes422` and `proRes4444`](https://documentation.apple.com/en/finalcutpro/professionalformatsandworkflows/index.html#chapter=10%26section=2%26tasks=true) codecs are uncompressed data. They will create huge files.
-
 
 ## Why
 
@@ -173,12 +171,6 @@ Yes, we can, but the performance is terrible:
 
 ![aperture](https://cloud.githubusercontent.com/assets/4721750/19214743/11f4aaaa-8d61-11e6-9822-4e83bcdfab24.jpg)
 
-
 ## Related
 
 - [Aperture](https://github.com/wulkano/Aperture) - The Swift framework used in this package
-
-
-## License
-
-MIT
