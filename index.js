@@ -110,7 +110,10 @@ class Aperture {
         ]
       );
 
-      this.isFileReady = this.waitForEvent('onFileReady').then(() => this.tmpPath);
+      this.isFileReady = (async () => {
+        await this.waitForEvent('onFileReady');
+        return this.tmpPath;
+      })();
 
       const timeout = setTimeout(() => {
         // `.stopRecording()` was called already
@@ -131,17 +134,18 @@ class Aperture {
         reject(error);
       });
 
-      this.isFileReady = new Promise(resolve => {
-        this._fileReadyResolve = resolve;
-      });
-
       this.recorder.stdout.setEncoding('utf8');
       this.recorder.stdout.on('data', debuglog);
 
-      this.waitForEvent('onStart').then(() => {
-        clearTimeout(timeout);
-        setTimeout(resolve, 1000);
-      });
+      (async () => {
+        try {
+          await this.waitForEvent('onStart');
+          clearTimeout(timeout);
+          setTimeout(resolve, 1000);
+        } catch (error) {
+          reject(error);
+        }
+      })();
     });
   }
 
