@@ -40,8 +40,8 @@ extension ApertureCLI {
   struct Record: ParsableCommand {
     static var configuration = CommandConfiguration(abstract: "Start a recording with the given options.")
 
-    @Option(name: .shortAndLong, default: "main", help: "The id to use for this process")
-    var processId: String
+    @Option(name: .shortAndLong, help: "The id to use for this process")
+    var processId: String = "main"
 
     @Argument(help: "Stringified JSON object with options passed to Aperture")
     var options: String
@@ -64,7 +64,7 @@ extension ApertureCLI.List {
 
     mutating func run() throws {
       // Uses stderr because of unrelated stuff being outputted on stdout
-      print(try toJson(Devices.screen()), to: .standardError)
+      print(try toJson(Aperture.Devices.screen().map { ["id": $0.id, "name": $0.name] }), to: .standardError)
     }
   }
 
@@ -73,7 +73,7 @@ extension ApertureCLI.List {
 
     mutating func run() throws {
       // Uses stderr because of unrelated stuff being outputted on stdout
-      print(try toJson(Devices.audio()), to: .standardError)
+      print(try toJson(Aperture.Devices.audio().map { ["id": $0.id, "name": $0.name] }), to: .standardError)
     }
   }
 }
@@ -82,11 +82,11 @@ extension ApertureCLI.Events {
   struct Send: ParsableCommand {
     static var configuration = CommandConfiguration(abstract: "Send an event to the given process.")
 
-    @Flag(default: true, inversion: .prefixedNo, help: "Wait for event to be received")
-    var wait: Bool
+    @Flag(inversion: .prefixedNo, help: "Wait for event to be received")
+    var wait: Bool = true
 
-    @Option(name: .shortAndLong, default: "main", help: "The id of the target process")
-    var processId: String
+    @Option(name: .shortAndLong, help: "The id of the target process")
+    var processId: String = "main"
 
     @Argument(help: "Name of the event to send. Can be one of:\n\(InEvent.toStringArray())")
     var event: InEvent
@@ -95,8 +95,8 @@ extension ApertureCLI.Events {
     var data: String?
 
     mutating func run() {
-      sendEvent(processId: processId, event: event.rawValue, data: data) { notification in
-        if let data = notification.getData() {
+      ApertureEvents.sendEvent(processId: processId, event: event.rawValue, data: data) { notification in
+        if let data = notification.data {
           print(data)
         }
 
@@ -113,17 +113,17 @@ extension ApertureCLI.Events {
     static var configuration = CommandConfiguration(abstract: "Listen to an outcoming event for the given process.")
 
     @Flag(help: "Exit after receiving the event once")
-    var exit: Bool
+    var exit = false
 
-    @Option(name: .shortAndLong, default: "main", help: "The id of the target process")
-    var processId: String
+    @Option(name: .shortAndLong, help: "The id of the target process")
+    var processId: String = "main"
 
     @Argument(help: "Name of the event to listen for. Can be one of:\n\(OutEvent.toStringArray())")
     var event: OutEvent
 
     func run() {
-      _ = answerEvent(processId: processId, event: event.rawValue) { notification in
-        if let data = notification.getData() {
+      _ = ApertureEvents.answerEvent(processId: processId, event: event.rawValue) { notification in
+        if let data = notification.data {
           print(data)
         }
 
@@ -140,13 +140,13 @@ extension ApertureCLI.Events {
   struct ListenAll: ParsableCommand {
     static var configuration = CommandConfiguration(abstract: "Listen to all outcoming events for the given process.")
 
-    @Option(name: .shortAndLong, default: "main", help: "The id of the target process")
-    var processId: String
+    @Option(name: .shortAndLong, help: "The id of the target process")
+    var processId: String = "main"
 
     func run() {
       for event in OutEvent.allCases {
-        _ = answerEvent(processId: processId, event: event.rawValue) { notification in
-          if let data = notification.getData() {
+        _ = ApertureEvents.answerEvent(processId: processId, event: event.rawValue) { notification in
+          if let data = notification.data {
             print("\(event) \(data)")
           } else {
             print(event)

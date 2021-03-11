@@ -25,32 +25,32 @@ func record(_ optionsString: String, processId: String) throws {
     highlightClicks: options.highlightClicks,
     screenId: options.screenId == 0 ? .main : options.screenId,
     audioDevice: options.audioDeviceId != nil ? AVCaptureDevice(uniqueID: options.audioDeviceId!) : nil,
-    videoCodec: options.videoCodec
+    videoCodec: options.videoCodec != nil ? AVVideoCodecType(rawValue: options.videoCodec!) : nil
   )
 
   recorder.onStart = {
-    sendEvent(processId: processId, event: OutEvent.onFileReady.rawValue)
+    ApertureEvents.sendEvent(processId: processId, event: OutEvent.onFileReady.rawValue)
   }
 
   recorder.onPause = {
-    sendEvent(processId: processId, event: OutEvent.onPause.rawValue)
+    ApertureEvents.sendEvent(processId: processId, event: OutEvent.onPause.rawValue)
   }
 
   recorder.onResume = {
-    sendEvent(processId: processId, event: OutEvent.onResume.rawValue)
+    ApertureEvents.sendEvent(processId: processId, event: OutEvent.onResume.rawValue)
   }
 
-  recorder.onFinish = {
-    sendEvent(processId: processId, event: OutEvent.onFinish.rawValue)
+  recorder.onFinish = { error in
+    guard error == nil else {
+      print(error!, to: .standardError)
+      exit(1)
+    }
+
+    ApertureEvents.sendEvent(processId: processId, event: OutEvent.onFinish.rawValue)
     for observer in observers {
       DistributedNotificationCenter.default().removeObserver(observer)
     }
     exit(0)
-  }
-
-  recorder.onError = {
-    print($0, to: .standardError)
-    exit(1)
   }
 
   CLI.onExit = {
@@ -60,25 +60,25 @@ func record(_ optionsString: String, processId: String) throws {
   }
 
   observers.append(
-    answerEvent(processId: processId, event: InEvent.pause.rawValue) { _ in
+    ApertureEvents.answerEvent(processId: processId, event: InEvent.pause.rawValue) { _ in
       recorder.pause()
     }
   )
 
   observers.append(
-    answerEvent(processId: processId, event: InEvent.resume.rawValue) { _ in
+    ApertureEvents.answerEvent(processId: processId, event: InEvent.resume.rawValue) { _ in
       recorder.resume()
     }
   )
 
   observers.append(
-    answerEvent(processId: processId, event: InEvent.isPaused.rawValue) { notification in
+    ApertureEvents.answerEvent(processId: processId, event: InEvent.isPaused.rawValue) { notification in
       notification.answer(recorder.isPaused)
     }
   )
 
   recorder.start()
-  sendEvent(processId: processId, event: OutEvent.onStart.rawValue)
+  ApertureEvents.sendEvent(processId: processId, event: OutEvent.onStart.rawValue)
 
   RunLoop.main.run()
 }

@@ -4,3 +4,5 @@ yarn.lock
 /Packages
 /*.xcodeproj
 /aperture
+
+recording.mp4

@@ -44,7 +44,7 @@ class Aperture {
     videoCodec = undefined
   } = {}) {
     this.processId = getRandomId();
-    return new Promise(async (resolve, reject) => {
+    return new Promise((resolve, reject) => {
       if (this.recorder !== undefined) {
         reject(new Error('Call `.stopRecording()` first'));
         return;
@@ -134,9 +134,10 @@ class Aperture {
       this.recorder.stdout.setEncoding('utf8');
       this.recorder.stdout.on('data', debuglog);
 
-      await this.waitForEvent('onStart');
-      clearTimeout(timeout);
-      setTimeout(() => resolve(this.tmpPath), 1000);
+      this.waitForEvent('onStart').then(() => {
+        clearTimeout(timeout);
+        setTimeout(() => resolve(this.tmpPath), 1000);
+      });
     });
   }
 
