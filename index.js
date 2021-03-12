@@ -182,24 +182,34 @@ class Aperture {
     }
   }
 
+  throwIfNotStarted() {
+    if (this.recorder === undefined) {
+      throw new Error('Call `.startRecording()` first');
+    }
+  }
+
   async pause() {
-    return this.sendEvent('pause');
+    this.throwIfNotStarted();
+
+    await this.sendEvent('pause');
   }
 
   async resume() {
+    this.throwIfNotStarted();
+
     await this.sendEvent('resume');
     // It takes about 1s after the promise resolves for the recording to actually start
     await delay(1000);
   }
 
   async isPaused() {
+    this.throwIfNotStarted();
+
     return this.sendEvent('isPaused', val => val === 'true');
   }
 
   async stopRecording() {
-    if (this.recorder === undefined) {
-      throw new Error('Call `.startRecording()` first');
-    }
+    this.throwIfNotStarted();
 
     this.recorder.kill();
     await this.recorder;
