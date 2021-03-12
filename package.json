@@ -8,13 +8,14 @@
     "node": ">=8"
   },
   "scripts": {
-    "test": "xo && ava",
+    "test": "xo && ava && tsd",
     "build": "swift build --configuration=release && mv .build/release/aperture .",
     "prepublish": "npm run build"
   },
   "files": [
     "index.js",
-    "aperture"
+    "aperture",
+    "index.d.ts"
   ],
   "dependencies": {
     "electron-util": "^0.11.0",
@@ -28,6 +29,7 @@
     "delay": "^4.1.0",
     "file-type": "^10.8.0",
     "read-chunk": "^3.0.0",
+    "tsd": "^0.14.0",
     "xo": "^0.24.0"
   },
   "xo": {
