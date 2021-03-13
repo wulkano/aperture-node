@@ -1,14 +1,16 @@
 'use strict';
 const os = require('os');
-const util = require('util');
+const {debuglog} = require('util');
 const path = require('path');
 const execa = require('execa');
 const tempy = require('tempy');
 const macosVersion = require('macos-version');
 const fileUrl = require('file-url');
 const electronUtil = require('electron-util/node');
+const delay = require('delay');
 
-const debuglog = util.debuglog('aperture');
+const log = debuglog('aperture');
+const getRandomId = () => Math.random().toString(36).slice(2, 15);
 
 // Workaround for https://github.com/electron/electron/issues/9459
 const BIN = path.join(electronUtil.fixPathForAsarUnpack(__dirname), 'aperture');
@@ -20,7 +22,7 @@ const supportsHevcHardwareEncoding = (() => {
 
   // Get the Intel Core generation, the `4` in `Intel(R) Core(TM) i7-4850HQ CPU @ 2.30GHz`
   // More info: https://www.intel.com/content/www/us/en/processors/processor-numbers.html
-  const result = /Intel.*Core.*i(?:7|5)-(\d)/.exec(os.cpus()[0].model);
+  const result = /Intel.*Core.*i[57]-(\d)/.exec(os.cpus()[0].model);
 
   // Intel Core generation 6 or higher supports HEVC hardware encoding
   return result && Number(result[1]) >= 6;
@@ -40,6 +42,8 @@ class Aperture {
     audioDeviceId = undefined,
     videoCodec = undefined
   } = {}) {
+    this.processId = getRandomId();
+
     return new Promise((resolve, reject) => {
       if (this.recorder !== undefined) {
         reject(new Error('Call `.stopRecording()` first'));
@@ -52,17 +56,19 @@ class Aperture {
         showCursor = true;
       }
 
-      if (typeof cropArea === 'object') {
-        if (typeof cropArea.x !== 'number' ||
-            typeof cropArea.y !== 'number' ||
-            typeof cropArea.width !== 'number' ||
-            typeof cropArea.height !== 'number') {
-          reject(new Error('Invalid `cropArea` option object'));
-          return;
-        }
+      if (typeof cropArea === 'object' &&
+           (
+             typeof cropArea.x !== 'number' ||
+             typeof cropArea.y !== 'number' ||
+             typeof cropArea.width !== 'number' ||
+             typeof cropArea.height !== 'number'
+           )
+      ) {
+        reject(new Error('Invalid `cropArea` option object'));
+        return;
       }
 
-      const recorderOpts = {
+      const recorderOptions = {
         destination: fileUrl(this.tmpPath),
         framesPerSecond: fps,
         showCursor,
@@ -72,7 +78,7 @@ class Aperture {
       };
 
       if (cropArea) {
-        recorderOpts.cropRect = [
+        recorderOptions.cropRect = [
           [cropArea.x, cropArea.y],
           [cropArea.width, cropArea.height]
         ];
@@ -94,10 +100,22 @@ class Aperture {
           throw new Error(`Unsupported video codec specified: ${videoCodec}`);
         }
 
-        recorderOpts.videoCodec = codecMap.get(videoCodec);
+        recorderOptions.videoCodec = codecMap.get(videoCodec);
       }
 
-      this.recorder = execa(BIN, [JSON.stringify(recorderOpts)]);
+      this.recorder = execa(
+        BIN, [
+          'record',
+          '--process-id',
+          this.processId,
+          JSON.stringify(recorderOptions)
+        ]
+      );
+
+      this.isFileReady = (async () => {
+        await this.waitForEvent('onFileReady');
+        return this.tmpPath;
+      })();
 
       const timeout = setTimeout(() => {
         // `.stopRecording()` was called already
@@ -105,11 +123,11 @@ class Aperture {
           return;
         }
 
-        const err = new Error('Could not start recording within 5 seconds');
-        err.code = 'RECORDER_TIMEOUT';
+        const error = new Error('Could not start recording within 5 seconds');
+        error.code = 'RECORDER_TIMEOUT';
         this.recorder.kill();
         delete this.recorder;
-        reject(err);
+        reject(error);
       }, 5000);
 
       this.recorder.catch(error => {
@@ -118,39 +136,87 @@ class Aperture {
         reject(error);
       });
 
-      this.isFileReady = new Promise(resolve => {
-        this._fileReadyResolve = resolve;
-      });
-
       this.recorder.stdout.setEncoding('utf8');
-      this.recorder.stdout.on('data', data => {
-        debuglog(data);
+      this.recorder.stdout.on('data', log);
 
-        const trimmed = data.trim();
-
-        if (trimmed === 'R') {
-          // `R` is printed by Swift about a second before the recording **actually** starts
+      (async () => {
+        try {
+          await this.waitForEvent('onStart');
           clearTimeout(timeout);
           setTimeout(resolve, 1000);
-        } else if (trimmed === 'FR') {
-          // `FR` is printed by Swift when the the recording file is ready
-          if (this._fileReadyResolve) {
-            this._fileReadyResolve(this.tmpPath);
-          }
+        } catch (error) {
+          reject(error);
         }
-      });
+      })();
     });
   }
 
-  async stopRecording() {
+  async waitForEvent(name, parse) {
+    const {stdout} = await execa(
+      BIN, [
+        'events',
+        'listen',
+        '--process-id',
+        this.processId,
+        '--exit',
+        name
+      ]
+    );
+
+    if (parse) {
+      return parse(stdout.trim());
+    }
+  }
+
+  async sendEvent(name, parse) {
+    const {stdout} = await execa(
+      BIN, [
+        'events',
+        'send',
+        '--process-id',
+        this.processId,
+        name
+      ]
+    );
+
+    if (parse) {
+      return parse(stdout.trim());
+    }
+  }
+
+  throwIfNotStarted() {
     if (this.recorder === undefined) {
       throw new Error('Call `.startRecording()` first');
     }
+  }
+
+  async pause() {
+    this.throwIfNotStarted();
+
+    await this.sendEvent('pause');
+  }
+
+  async resume() {
+    this.throwIfNotStarted();
+
+    await this.sendEvent('resume');
+
+    // It takes about 1s after the promise resolves for the recording to actually start
+    await delay(1000);
+  }
+
+  async isPaused() {
+    this.throwIfNotStarted();
+
+    return this.sendEvent('isPaused', value => value === 'true');
+  }
+
+  async stopRecording() {
+    this.throwIfNotStarted();
 
     this.recorder.kill();
     await this.recorder;
     delete this.recorder;
-    delete this._fileReadyResolve;
     delete this.isFileReady;
 
     return this.tmpPath;
@@ -160,21 +226,21 @@ class Aperture {
 module.exports = () => new Aperture();
 
 module.exports.screens = async () => {
-  const stderr = await execa.stderr(BIN, ['list-screens']);
+  const {stderr} = await execa(BIN, ['list', 'screens']);
 
   try {
     return JSON.parse(stderr);
-  } catch (_) {
+  } catch {
     return stderr;
   }
 };
 
 module.exports.audioDevices = async () => {
-  const stderr = await execa.stderr(BIN, ['list-audio-devices']);
+  const {stderr} = await execa(BIN, ['list', 'audio-devices']);
 
   try {
     return JSON.parse(stderr);
-  } catch (_) {
+  } catch {
     return stderr;
   }
 };

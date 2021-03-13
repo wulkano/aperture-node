@@ -5,7 +5,7 @@
   "license": "MIT",
   "repository": "wulkano/aperture-node",
   "engines": {
-    "node": ">=8"
+    "node": ">=10"
   },
   "scripts": {
     "test": "xo && ava && tsd",
@@ -18,19 +18,19 @@
     "index.d.ts"
   ],
   "dependencies": {
-    "electron-util": "^0.11.0",
-    "execa": "^1.0.0",
-    "file-url": "^2.0.2",
-    "macos-version": "^5.0.0",
-    "tempy": "^0.2.1"
+    "electron-util": "^0.14.2",
+    "execa": "^5.0.0",
+    "file-url": "^3.0.0",
+    "macos-version": "^5.2.1",
+    "tempy": "^1.0.0"
   },
   "devDependencies": {
-    "ava": "^1.2.1",
-    "delay": "^4.1.0",
-    "file-type": "^10.8.0",
-    "read-chunk": "^3.0.0",
+    "ava": "^2.4.0",
+    "delay": "^5.0.0",
+    "file-type": "^12.0.0",
+    "read-chunk": "^3.2.0",
     "tsd": "^0.14.0",
-    "xo": "^0.24.0"
+    "xo": "^0.38.2"
   },
   "xo": {
     "space": true
