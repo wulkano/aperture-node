@@ -2,7 +2,7 @@ import Foundation
 
 final class ApertureNotification {
   static func notificationName(forEvent event: String, processId: String) -> String {
-    return "aperture.\(processId).\(event)"
+    "aperture.\(processId).\(event)"
   }
 
   private var notification: Notification
@@ -13,19 +13,17 @@ final class ApertureNotification {
   }
 
   func getField<T>(_ name: String) -> T? {
-    return notification.userInfo?[name] as? T
+    notification.userInfo?[name] as? T
   }
 
-  var data: String? {
-    return getField("data")
-  }
+  var data: String? { getField("data") }
 
   func answer(_ data: Any? = nil) {
     isAnswered = true
 
-    let responseIdentifier: String? = getField("responseIdentifier")
-
-    guard responseIdentifier != nil else {
+    guard
+	  let responseIdentifier: String = getField("responseIdentifier")
+	else {
       return
     }
 
@@ -36,7 +34,7 @@ final class ApertureNotification {
     }
 
     DistributedNotificationCenter.default().postNotificationName(
-      .init(responseIdentifier!),
+      .init(responseIdentifier),
       object: nil,
       userInfo: payload,
       deliverImmediately: true
@@ -50,7 +48,7 @@ enum ApertureEvents {
     event: String,
     using handler: @escaping (ApertureNotification) -> Void
   ) -> NSObjectProtocol {
-    return DistributedNotificationCenter.default().addObserver(
+	DistributedNotificationCenter.default().addObserver(
       forName: .init(ApertureNotification.notificationName(forEvent: event, processId: processId)),
       object: nil,
       queue: nil
@@ -61,7 +59,7 @@ enum ApertureEvents {
       if !apertureNotification.isAnswered {
         apertureNotification.answer()
       }
-    }
+	}
   }
 
   static func sendEvent(
@@ -100,11 +98,28 @@ enum ApertureEvents {
     )
   }
 
-  static func sendEvent(processId: String, event: String, using callback: @escaping (ApertureNotification) -> Void) {
-    sendEvent(processId: processId, event: event, data: nil, using: callback)
+  static func sendEvent(
+    processId: String,
+    event: String,
+    using callback: @escaping (ApertureNotification) -> Void
+  ) {
+    sendEvent(
+        processId: processId,
+        event: event,
+        data: nil,
+        using: callback
+    )
   }
 
-  static func sendEvent(processId: String, event: String, data: Any? = nil) {
-    sendEvent(processId: processId, event: event, data: data) { _ in }
+  static func sendEvent(
+    processId: String,
+    event: String,
+    data: Any? = nil
+  ) {
+    sendEvent(
+        processId: processId,
+        event: event,
+        data: data
+    ) { _ in }
   }
 }

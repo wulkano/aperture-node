@@ -43,6 +43,7 @@ class Aperture {
     videoCodec = undefined
   } = {}) {
     this.processId = getRandomId();
+
     return new Promise((resolve, reject) => {
       if (this.recorder !== undefined) {
         reject(new Error('Call `.stopRecording()` first'));
@@ -199,6 +200,7 @@ class Aperture {
     this.throwIfNotStarted();
 
     await this.sendEvent('resume');
+
     // It takes about 1s after the promise resolves for the recording to actually start
     await delay(1000);
   }

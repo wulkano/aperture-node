@@ -41,15 +41,17 @@ func record(_ optionsString: String, processId: String) throws {
   }
 
   recorder.onFinish = { error in
-    guard error == nil else {
-      print(error!, to: .standardError)
+    if let error = error {
+      print(error, to: .standardError)
       exit(1)
     }
 
     ApertureEvents.sendEvent(processId: processId, event: OutEvent.onFinish.rawValue)
+
     for observer in observers {
       DistributedNotificationCenter.default().removeObserver(observer)
     }
+
     exit(0)
   }
 

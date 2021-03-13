@@ -18,30 +18,37 @@ enum InEvent: String, CaseIterable, ExpressibleByArgument {
 }
 
 extension CaseIterable {
-  static func toStringArray() -> String {
-    return allCases.map { "\($0)" }.joined(separator: ", ")
+  static var asCommaSeparatedList: String {
+    allCases.map { "\($0)" }.joined(separator: ", ")
   }
 }
 
 struct ApertureCLI: ParsableCommand {
-  static var configuration = CommandConfiguration(
+  static let configuration = CommandConfiguration(
     commandName: "aperture",
-    subcommands: [List.self, Record.self, Events.self]
+    subcommands: [
+        List.self,
+        Record.self,
+        Events.self
+    ]
   )
 }
 
 extension ApertureCLI {
   struct List: ParsableCommand {
-    static var configuration = CommandConfiguration(
-      subcommands: [Screens.self, AudioDevices.self]
+    static let configuration = CommandConfiguration(
+      subcommands: [
+        Screens.self,
+        AudioDevices.self
+      ]
     )
   }
 
   struct Record: ParsableCommand {
-    static var configuration = CommandConfiguration(abstract: "Start a recording with the given options.")
+    static let configuration = CommandConfiguration(abstract: "Start a recording with the given options.")
 
     @Option(name: .shortAndLong, help: "The ID to use for this process")
-    var processId: String = "main"
+    var processId = "main"
 
     @Argument(help: "Stringified JSON object with options passed to Aperture")
     var options: String
@@ -52,27 +59,31 @@ extension ApertureCLI {
   }
 
   struct Events: ParsableCommand {
-    static var configuration = CommandConfiguration(
-      subcommands: [Send.self, Listen.self, ListenAll.self]
+    static let configuration = CommandConfiguration(
+      subcommands: [
+        Send.self,
+        Listen.self,
+        ListenAll.self
+      ]
     )
   }
 }
 
 extension ApertureCLI.List {
   struct Screens: ParsableCommand {
-    static var configuration = CommandConfiguration(abstract: "List available screens.")
+    static let configuration = CommandConfiguration(abstract: "List available screens.")
 
     mutating func run() throws {
-      // Uses stderr because of unrelated stuff being outputted on stdout
+      // Uses stderr because of unrelated stuff being outputted on stdout.
       print(try toJson(Aperture.Devices.screen().map { ["id": $0.id, "name": $0.name] }), to: .standardError)
     }
   }
 
   struct AudioDevices: ParsableCommand {
-    static var configuration = CommandConfiguration(abstract: "List available audio devices.")
+    static let configuration = CommandConfiguration(abstract: "List available audio devices.")
 
     mutating func run() throws {
-      // Uses stderr because of unrelated stuff being outputted on stdout
+      // Uses stderr because of unrelated stuff being outputted on stdout.
       print(try toJson(Aperture.Devices.audio().map { ["id": $0.id, "name": $0.name] }), to: .standardError)
     }
   }
@@ -80,15 +91,15 @@ extension ApertureCLI.List {
 
 extension ApertureCLI.Events {
   struct Send: ParsableCommand {
-    static var configuration = CommandConfiguration(abstract: "Send an event to the given process.")
+    static let configuration = CommandConfiguration(abstract: "Send an event to the given process.")
 
     @Flag(inversion: .prefixedNo, help: "Wait for event to be received")
-    var wait: Bool = true
+    var wait = true
 
     @Option(name: .shortAndLong, help: "The ID of the target process")
-    var processId: String = "main"
+    var processId = "main"
 
-    @Argument(help: "Name of the event to send. Can be one of:\n\(InEvent.toStringArray())")
+    @Argument(help: "Name of the event to send. Can be one of:\n\(InEvent.asCommaSeparatedList)")
     var event: InEvent
 
     @Argument(help: "Data to pass to the event")
@@ -110,15 +121,15 @@ extension ApertureCLI.Events {
   }
 
   struct Listen: ParsableCommand {
-    static var configuration = CommandConfiguration(abstract: "Listen to an outcoming event for the given process.")
+    static let configuration = CommandConfiguration(abstract: "Listen to an outcoming event for the given process.")
 
     @Flag(help: "Exit after receiving the event once")
     var exit = false
 
     @Option(name: .shortAndLong, help: "The ID of the target process")
-    var processId: String = "main"
+    var processId = "main"
 
-    @Argument(help: "Name of the event to listen for. Can be one of:\n\(OutEvent.toStringArray())")
+    @Argument(help: "Name of the event to listen for. Can be one of:\n\(OutEvent.asCommaSeparatedList)")
     var event: OutEvent
 
     func run() {
@@ -127,7 +138,7 @@ extension ApertureCLI.Events {
           print(data)
         }
 
-        if self.exit {
+        if exit {
           notification.answer()
           Foundation.exit(0)
         }
@@ -138,10 +149,10 @@ extension ApertureCLI.Events {
   }
 
   struct ListenAll: ParsableCommand {
-    static var configuration = CommandConfiguration(abstract: "Listen to all outcoming events for the given process.")
+    static let configuration = CommandConfiguration(abstract: "Listen to all outcoming events for the given process.")
 
     @Option(name: .shortAndLong, help: "The ID of the target process")
-    var processId: String = "main"
+    var processId = "main"
 
     func run() {
       for event in OutEvent.allCases {

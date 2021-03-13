@@ -96,7 +96,7 @@ extension FileHandle: TextOutputStream {
   }
 }
 
-struct CLI {
+enum CLI {
   static var standardInput = FileHandle.standardInput
   static var standardOutput = FileHandle.standardOutput
   static var standardError = FileHandle.standardError
@@ -221,13 +221,13 @@ final class Once {
 
 extension Data {
   func jsonDecoded<T: Decodable>() throws -> T {
-    return try JSONDecoder().decode(T.self, from: self)
+    try JSONDecoder().decode(T.self, from: self)
   }
 }
 
 extension String {
   func jsonDecoded<T: Decodable>() throws -> T {
-    return try data(using: .utf8)!.jsonDecoded()
+    try data(using: .utf8)!.jsonDecoded()
   }
 }
 
