@@ -7,8 +7,11 @@ const tempy = require('tempy');
 const macosVersion = require('macos-version');
 const fileUrl = require('file-url');
 const electronUtil = require('electron-util/node');
+const delay = require('delay');
 
 const debuglog = util.debuglog('aperture');
+
+const getRandomId = () => Math.random().toString(36).substring(2, 15);
 
 // Workaround for https://github.com/electron/electron/issues/9459
 const BIN = path.join(electronUtil.fixPathForAsarUnpack(__dirname), 'aperture');
@@ -40,6 +43,7 @@ class Aperture {
     audioDeviceId = undefined,
     videoCodec = undefined
   } = {}) {
+    this.processId = getRandomId();
     return new Promise((resolve, reject) => {
       if (this.recorder !== undefined) {
         reject(new Error('Call `.stopRecording()` first'));
@@ -97,7 +101,19 @@ class Aperture {
         recorderOpts.videoCodec = codecMap.get(videoCodec);
       }
 
-      this.recorder = execa(BIN, [JSON.stringify(recorderOpts)]);
+      this.recorder = execa(
+        BIN, [
+          'record',
+          '--process-id',
+          this.processId,
+          JSON.stringify(recorderOpts)
+        ]
+      );
+
+      this.isFileReady = (async () => {
+        await this.waitForEvent('onFileReady');
+        return this.tmpPath;
+      })();
 
       const timeout = setTimeout(() => {
         // `.stopRecording()` was called already
@@ -118,39 +134,86 @@ class Aperture {
         reject(error);
       });
 
-      this.isFileReady = new Promise(resolve => {
-        this._fileReadyResolve = resolve;
-      });
-
       this.recorder.stdout.setEncoding('utf8');
-      this.recorder.stdout.on('data', data => {
-        debuglog(data);
+      this.recorder.stdout.on('data', debuglog);
 
-        const trimmed = data.trim();
-
-        if (trimmed === 'R') {
-          // `R` is printed by Swift about a second before the recording **actually** starts
+      (async () => {
+        try {
+          await this.waitForEvent('onStart');
           clearTimeout(timeout);
           setTimeout(resolve, 1000);
-        } else if (trimmed === 'FR') {
-          // `FR` is printed by Swift when the the recording file is ready
-          if (this._fileReadyResolve) {
-            this._fileReadyResolve(this.tmpPath);
-          }
+        } catch (error) {
+          reject(error);
         }
-      });
+      })();
     });
   }
 
-  async stopRecording() {
+  async waitForEvent(name, parse) {
+    const {stdout} = await execa(
+      BIN, [
+        'events',
+        'listen',
+        '--process-id',
+        this.processId,
+        '--exit',
+        name
+      ]
+    );
+
+    if (parse) {
+      return parse(stdout.trim());
+    }
+  }
+
+  async sendEvent(name, parse) {
+    const {stdout} = await execa(
+      BIN, [
+        'events',
+        'send',
+        '--process-id',
+        this.processId,
+        name
+      ]
+    );
+
+    if (parse) {
+      return parse(stdout.trim());
+    }
+  }
+
+  throwIfNotStarted() {
     if (this.recorder === undefined) {
       throw new Error('Call `.startRecording()` first');
     }
+  }
+
+  async pause() {
+    this.throwIfNotStarted();
+
+    await this.sendEvent('pause');
+  }
+
+  async resume() {
+    this.throwIfNotStarted();
+
+    await this.sendEvent('resume');
+    // It takes about 1s after the promise resolves for the recording to actually start
+    await delay(1000);
+  }
+
+  async isPaused() {
+    this.throwIfNotStarted();
+
+    return this.sendEvent('isPaused', val => val === 'true');
+  }
+
+  async stopRecording() {
+    this.throwIfNotStarted();
 
     this.recorder.kill();
     await this.recorder;
     delete this.recorder;
-    delete this._fileReadyResolve;
     delete this.isFileReady;
 
     return this.tmpPath;
@@ -160,7 +223,7 @@ class Aperture {
 module.exports = () => new Aperture();
 
 module.exports.screens = async () => {
-  const stderr = await execa.stderr(BIN, ['list-screens']);
+  const stderr = await execa.stderr(BIN, ['list', 'screens']);
 
   try {
     return JSON.parse(stderr);
@@ -170,7 +233,7 @@ module.exports.screens = async () => {
 };
 
 module.exports.audioDevices = async () => {
-  const stderr = await execa.stderr(BIN, ['list-audio-devices']);
+  const stderr = await execa.stderr(BIN, ['list', 'audio-devices']);
 
   try {
     return JSON.parse(stderr);

@@ -1,10 +1,10 @@
-// swift-tools-version:5.2
+// swift-tools-version:5.3
 import PackageDescription
 
 let package = Package(
   name: "ApertureCLI",
   platforms: [
-    .macOS(.v10_12)
+    .macOS(.v10_13)
   ],
   products: [
     .executable(
@@ -15,13 +15,15 @@ let package = Package(
     )
   ],
   dependencies: [
-    .package(url: "https://github.com/wulkano/Aperture", from: "0.2.0")
+    .package(url: "https://github.com/wulkano/Aperture", from: "0.4.0"),
+    .package(url: "https://github.com/apple/swift-argument-parser", from: "0.4.0")
   ],
   targets: [
     .target(
       name: "ApertureCLI",
       dependencies: [
-        "Aperture"
+        "Aperture",
+        .product(name: "ArgumentParser", package: "swift-argument-parser")
       ]
     )
   ]

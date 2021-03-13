@@ -8,7 +8,7 @@
 $ npm install aperture
 ```
 
-*Requires macOS 10.12 or later.*
+*Requires macOS 10.13 or later.*
 
 ## Usage
 
@@ -92,6 +92,22 @@ Returns a `Promise` that fullfills when the recording starts or rejects if the r
 Only available while a recording is happening, `undefined` otherwise.
 
 Usually, this resolves around 1 second before the recording starts, but that's not guaranteed.
+
+#### recorder.pause()
+
+Pauses the recording. To resume, call `recorder.resume()`.
+
+Returns a `Promise` that fullfills when the recording has been paused.
+
+#### recorder.resume()
+
+Resumes the recording if it's been paused.
+
+Returns a `Promise` that fullfills when the recording has been resumed.
+
+#### recorder.isPaused()
+
+Returns a `Promise` that resolves with a boolean indicating whether or not the recording is currently paused.
 
 #### recorder.stopRecording()
 
