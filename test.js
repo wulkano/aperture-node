@@ -3,7 +3,7 @@ import test from 'ava';
 import delay from 'delay';
 import readChunk from 'read-chunk';
 import fileType from 'file-type';
-import aperture from '.';
+import aperture from './index.js';
 
 test('returns audio devices', async t => {
   const devices = await aperture.audioDevices();

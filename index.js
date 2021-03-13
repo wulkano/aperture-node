@@ -1,6 +1,6 @@
 'use strict';
 const os = require('os');
-const util = require('util');
+const {debuglog} = require('util');
 const path = require('path');
 const execa = require('execa');
 const tempy = require('tempy');
@@ -9,9 +9,8 @@ const fileUrl = require('file-url');
 const electronUtil = require('electron-util/node');
 const delay = require('delay');
 
-const debuglog = util.debuglog('aperture');
-
-const getRandomId = () => Math.random().toString(36).substring(2, 15);
+const log = debuglog('aperture');
+const getRandomId = () => Math.random().toString(36).slice(2, 15);
 
 // Workaround for https://github.com/electron/electron/issues/9459
 const BIN = path.join(electronUtil.fixPathForAsarUnpack(__dirname), 'aperture');
@@ -23,7 +22,7 @@ const supportsHevcHardwareEncoding = (() => {
 
   // Get the Intel Core generation, the `4` in `Intel(R) Core(TM) i7-4850HQ CPU @ 2.30GHz`
   // More info: https://www.intel.com/content/www/us/en/processors/processor-numbers.html
-  const result = /Intel.*Core.*i(?:7|5)-(\d)/.exec(os.cpus()[0].model);
+  const result = /Intel.*Core.*i[57]-(\d)/.exec(os.cpus()[0].model);
 
   // Intel Core generation 6 or higher supports HEVC hardware encoding
   return result && Number(result[1]) >= 6;
@@ -56,17 +55,19 @@ class Aperture {
         showCursor = true;
       }
 
-      if (typeof cropArea === 'object') {
-        if (typeof cropArea.x !== 'number' ||
-            typeof cropArea.y !== 'number' ||
-            typeof cropArea.width !== 'number' ||
-            typeof cropArea.height !== 'number') {
-          reject(new Error('Invalid `cropArea` option object'));
-          return;
-        }
+      if (typeof cropArea === 'object' &&
+           (
+             typeof cropArea.x !== 'number' ||
+             typeof cropArea.y !== 'number' ||
+             typeof cropArea.width !== 'number' ||
+             typeof cropArea.height !== 'number'
+           )
+      ) {
+        reject(new Error('Invalid `cropArea` option object'));
+        return;
       }
 
-      const recorderOpts = {
+      const recorderOptions = {
         destination: fileUrl(this.tmpPath),
         framesPerSecond: fps,
         showCursor,
@@ -76,7 +77,7 @@ class Aperture {
       };
 
       if (cropArea) {
-        recorderOpts.cropRect = [
+        recorderOptions.cropRect = [
           [cropArea.x, cropArea.y],
           [cropArea.width, cropArea.height]
         ];
@@ -98,7 +99,7 @@ class Aperture {
           throw new Error(`Unsupported video codec specified: ${videoCodec}`);
         }
 
-        recorderOpts.videoCodec = codecMap.get(videoCodec);
+        recorderOptions.videoCodec = codecMap.get(videoCodec);
       }
 
       this.recorder = execa(
@@ -106,7 +107,7 @@ class Aperture {
           'record',
           '--process-id',
           this.processId,
-          JSON.stringify(recorderOpts)
+          JSON.stringify(recorderOptions)
         ]
       );
 
@@ -121,11 +122,11 @@ class Aperture {
           return;
         }
 
-        const err = new Error('Could not start recording within 5 seconds');
-        err.code = 'RECORDER_TIMEOUT';
+        const error = new Error('Could not start recording within 5 seconds');
+        error.code = 'RECORDER_TIMEOUT';
         this.recorder.kill();
         delete this.recorder;
-        reject(err);
+        reject(error);
       }, 5000);
 
       this.recorder.catch(error => {
@@ -135,7 +136,7 @@ class Aperture {
       });
 
       this.recorder.stdout.setEncoding('utf8');
-      this.recorder.stdout.on('data', debuglog);
+      this.recorder.stdout.on('data', log);
 
       (async () => {
         try {
@@ -205,7 +206,7 @@ class Aperture {
   async isPaused() {
     this.throwIfNotStarted();
 
-    return this.sendEvent('isPaused', val => val === 'true');
+    return this.sendEvent('isPaused', value => value === 'true');
   }
 
   async stopRecording() {
@@ -223,21 +224,21 @@ class Aperture {
 module.exports = () => new Aperture();
 
 module.exports.screens = async () => {
-  const stderr = await execa.stderr(BIN, ['list', 'screens']);
+  const {stderr} = await execa(BIN, ['list', 'screens']);
 
   try {
     return JSON.parse(stderr);
-  } catch (_) {
+  } catch {
     return stderr;
   }
 };
 
 module.exports.audioDevices = async () => {
-  const stderr = await execa.stderr(BIN, ['list', 'audio-devices']);
+  const {stderr} = await execa(BIN, ['list', 'audio-devices']);
 
   try {
     return JSON.parse(stderr);
-  } catch (_) {
+  } catch {
     return stderr;
   }
 };
