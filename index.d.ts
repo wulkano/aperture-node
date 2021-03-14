@@ -56,7 +56,7 @@ declare namespace aperture {
     /**
     Video codec to use.
 
-    The `hevc` codec requires macOS 10.13 or newer. A computer with Intel 6th generation processor or newer is strongly recommended, as otherwise it will use software encoding, which only produces 3 FPS fullscreen recording.
+    A computer with Intel 6th generation processor or newer is strongly recommended for the `hevc` codec, as otherwise it will use software encoding, which only produces 3 FPS fullscreen recording.
 
     The `proRes422` and `proRes4444` codecs are uncompressed data. They will create huge files.
     */
@@ -110,7 +110,7 @@ declare const aperture: (() => aperture.Recorder) & {
 
   The key is the `videoCodec` option name and the value is the codec name.
 
-  It only returns `hevc` if you're on macOS 10.13 or newer and your computer supports HEVC hardware encoding.
+  It only returns `hevc` if your computer supports HEVC hardware encoding.
 
   @example
   ```

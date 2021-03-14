@@ -16,21 +16,27 @@ const getRandomId = () => Math.random().toString(36).slice(2, 15);
 const BIN = path.join(electronUtil.fixPathForAsarUnpack(__dirname), 'aperture');
 
 const supportsHevcHardwareEncoding = (() => {
-  if (!macosVersion.isGreaterThanOrEqualTo('10.13')) {
-    return false;
+  const cpuModel = os.cpus()[0].model;
+
+  // All Apple silicon Macs support HEVC hardware encoding.
+  if (cpuModel.startsWith('Apple ')) { // Source string example: `'Apple M1'`
+    return true;
   }
 
   // Get the Intel Core generation, the `4` in `Intel(R) Core(TM) i7-4850HQ CPU @ 2.30GHz`
   // More info: https://www.intel.com/content/www/us/en/processors/processor-numbers.html
-  const result = /Intel.*Core.*i[57]-(\d)/.exec(os.cpus()[0].model);
+  // Example strings:
+  // - `Intel(R) Core(TM) i9-9980HK CPU @ 2.40GHz`
+  // - `Intel(R) Core(TM) i7-4850HQ CPU @ 2.30GHz`
+  const result = /Intel.*Core.*i\d+-(\d)/.exec(cpuModel);
 
   // Intel Core generation 6 or higher supports HEVC hardware encoding
-  return result && Number(result[1]) >= 6;
+  return result && Number.parseInt(result[1], 10) >= 6;
 })();
 
 class Aperture {
   constructor() {
-    macosVersion.assertGreaterThanOrEqualTo('10.12');
+    macosVersion.assertGreaterThanOrEqualTo('10.13');
   }
 
   startRecording({
