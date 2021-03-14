@@ -7,15 +7,14 @@ const recorder = aperture();
 
 expectType<Recorder>(recorder);
 
-(async () => {
-  expectType<AudioDevice[]>(await aperture.audioDevices());
-  expectType<Screen[]>(await aperture.screens());
+expectType<AudioDevice[]>(await aperture.audioDevices());
 
-  expectError(recorder.startRecording({videoCodec: 'random'}));
+expectType<Screen[]>(await aperture.screens());
 
-  expectType<string | undefined>(await recorder.isFileReady);
+expectError(recorder.startRecording({videoCodec: 'random'}));
 
-  expectType<string>(await recorder.stopRecording());
-})();
+expectType<string | undefined>(await recorder.isFileReady);
+
+expectType<string>(await recorder.stopRecording());
 
 expectType<Map<VideoCodec, string>>(aperture.videoCodecs);
