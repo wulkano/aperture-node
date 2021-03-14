@@ -1,4 +1,3 @@
-
 declare namespace aperture {
   type Screen = {
     id: number;
@@ -16,38 +15,44 @@ declare namespace aperture {
     /**
     Number of frames per seconds.
     */
-    fps?: number;
+    readonly fps?: number;
+
     /**
     Record only an area of the screen.
     */
-    cropArea?: {
+    readonly cropArea?: {
       x: number;
       y: number;
       width: number;
       height: number;
     };
+
     /**
     Show the cursor in the screen recording.
     */
-    showCursor?: boolean;
+    readonly showCursor?: boolean;
+
     /**
     Highlight cursor clicks in the screen recording.
 
     Enabling this will also enable the `showCursor` option.
     */
-    highlightClicks?: boolean;
+    readonly highlightClicks?: boolean;
+
     /**
     Screen to record.
 
     Defaults to primary screen.
     */
-    screenId?: number;
+    readonly screenId?: number;
+
     /**
     Audio device to include in the screen recording.
 
     Should be one of the `id`'s from `aperture.audioDevices()`.
     */
-    audioDeviceId?: string;
+    readonly audioDeviceId?: string;
+
     /**
     Video codec to use.
 
@@ -55,7 +60,7 @@ declare namespace aperture {
 
     The `proRes422` and `proRes4444` codecs are uncompressed data. They will create huge files.
     */
-    videoCodec?: VideoCodec;
+    readonly videoCodec?: VideoCodec;
   };
 
   interface Recorder {
