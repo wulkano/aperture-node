@@ -1,6 +1,6 @@
 {
   "name": "aperture",
-  "version": "6.0.0",
+  "version": "6.0.1",
   "description": "Record the screen on macOS",
   "license": "MIT",
   "repository": "wulkano/aperture-node",
