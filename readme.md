@@ -14,7 +14,7 @@ $ npm install aperture
 
 ```js
 const delay = require('delay');
-const aperture = require('aperture')();
+const aperture = require('aperture');
 
 const options = {
   fps: 30,
