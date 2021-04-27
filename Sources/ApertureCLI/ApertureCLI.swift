@@ -23,6 +23,7 @@ extension CaseIterable {
   }
 }
 
+@main
 struct ApertureCLI: ParsableCommand {
   static let configuration = CommandConfiguration(
     commandName: "aperture",
@@ -169,5 +170,3 @@ extension ApertureCLI.Events {
     }
   }
 }
-
-ApertureCLI.main()

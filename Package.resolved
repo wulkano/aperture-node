@@ -6,8 +6,8 @@
         "repositoryURL": "https://github.com/wulkano/Aperture",
         "state": {
           "branch": null,
-          "revision": "2b347d60d58ce87f5ebe0269924efabcf8bed9c0",
-          "version": "0.4.0"
+          "revision": "ca7190c98debc8e66c7e8cd056fbcf42ef2d56ae",
+          "version": "1.0.0"
         }
       },
       {
@@ -15,8 +15,8 @@
         "repositoryURL": "https://github.com/apple/swift-argument-parser",
         "state": {
           "branch": null,
-          "revision": "831ed5e860a70e745bc1337830af4786b2576881",
-          "version": "0.4.1"
+          "revision": "47bd06ebeff8146ecd0020809e186218b46f465f",
+          "version": "0.4.2"
         }
       }
     ]

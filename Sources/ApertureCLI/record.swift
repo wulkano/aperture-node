@@ -15,7 +15,7 @@ struct Options: Decodable {
 func record(_ optionsString: String, processId: String) throws {
   setbuf(__stdoutp, nil)
   let options: Options = try optionsString.jsonDecoded()
-  var observers: [Any] = []
+  var observers = [Any]()
 
   let recorder = try Aperture(
     destination: options.destination,
