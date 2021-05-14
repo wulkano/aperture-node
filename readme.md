@@ -113,6 +113,9 @@ Returns a `Promise` that resolves with a boolean indicating whether or not the r
 
 Returns a `Promise` for the path to the screen recording file.
 
+#### recorder.cancel()
+
+Cancels a recoding if it was started
 ## Options
 
 Type: `object`
@@ -153,6 +156,13 @@ Type: `number`\
 Default: `aperture.screens()[0]` *(Primary screen)*
 
 Screen to record.
+
+#### scaleFactor
+
+Type: `number`\
+Default: `1`
+
+The actual height and width of the capture will be multiplied by this number to create the height and width of the output.
 
 #### audioDeviceId
 

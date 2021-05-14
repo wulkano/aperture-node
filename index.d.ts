@@ -61,6 +61,13 @@ declare namespace aperture {
     The `proRes422` and `proRes4444` codecs are uncompressed data. They will create huge files.
     */
     readonly videoCodec?: VideoCodec;
+
+    /**
+    Scale factor to use
+    The actual height and width of the capture will be multiplied by this number to create the height and width of the output.
+    @default 1
+    */
+    readonly scaleFactor?: number;
   };
 
   interface Recorder {
@@ -101,6 +108,11 @@ declare namespace aperture {
     Returns a `Promise` for the path to the screen recording file.
     */
     stopRecording: () => Promise<string>;
+
+    /**
+    Cancels a recording, if it was started
+    */
+    cancel: () => void;
   }
 }
 
