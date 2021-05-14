@@ -241,7 +241,7 @@ class Aperture {
     this.recorder.kill();
     delete this.recorder;
     delete this.isFileReady;
-    if(this.recorderTimeout !== undefined) {
+    if (this.recorderTimeout !== undefined) {
       clearTimeout(this.recorderTimeout)
     }
   }
