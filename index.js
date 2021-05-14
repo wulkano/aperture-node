@@ -40,7 +40,7 @@ class Aperture {
   }
 
 
-  recorderTimeout = null
+  recorderTimeout = undefined
 
   startRecording({
     fps = 30,
@@ -233,12 +233,16 @@ class Aperture {
     return this.tmpPath;
   }
 
-  cancelRecording() {
-    if (this.recorder !== undefined) {
-      this.recorder.kill();
-      delete this.recorder;
-      delete this.isFileReady;
-      this.recorderTimeout && clearTimeout(this.recorderTimeout)
+  cancel() {
+    if (this.recorder === undefined) {
+      return
+    }
+
+    this.recorder.kill();
+    delete this.recorder;
+    delete this.isFileReady;
+    if(this.recorderTimeout !== undefined) {
+      clearTimeout(this.recorderTimeout)
     }
   }
 }

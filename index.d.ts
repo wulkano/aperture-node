@@ -63,9 +63,10 @@ declare namespace aperture {
     readonly videoCodec?: VideoCodec;
 
     /**
-     Scale factor to use
-     Useful when recording retina screens, or for resizing the recorded video
-     */
+    Scale factor to use
+    The actual height and width of the capture will be multiplied by this number to create the height and width of the output.
+    @default 1
+    */
     readonly scaleFactor?: number;
   };
 
@@ -109,9 +110,9 @@ declare namespace aperture {
     stopRecording: () => Promise<string>;
 
     /**
-     Cancels a recording, if it was started
-     */
-    cancelRecording: () => void;
+    Cancels a recording, if it was started
+    */
+    cancel: () => void;
   }
 }
 
