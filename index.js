@@ -39,6 +39,9 @@ class Aperture {
     macosVersion.assertGreaterThanOrEqualTo('10.13');
   }
 
+
+  recorderTimeout = null
+
   startRecording({
     fps = 30,
     cropArea = undefined,
@@ -46,7 +49,8 @@ class Aperture {
     highlightClicks = false,
     screenId = 0,
     audioDeviceId = undefined,
-    videoCodec = undefined
+    videoCodec = undefined,
+    scaleFactor = 1
   } = {}) {
     this.processId = getRandomId();
 
@@ -80,7 +84,8 @@ class Aperture {
         showCursor,
         highlightClicks,
         screenId,
-        audioDeviceId
+        audioDeviceId,
+        scaleFactor
       };
 
       if (cropArea) {
@@ -123,7 +128,7 @@ class Aperture {
         return this.tmpPath;
       })();
 
-      const timeout = setTimeout(() => {
+      this.recorderTimeout = setTimeout(() => {
         // `.stopRecording()` was called already
         if (this.recorder === undefined) {
           return;
@@ -137,7 +142,7 @@ class Aperture {
       }, 5000);
 
       this.recorder.catch(error => {
-        clearTimeout(timeout);
+        clearTimeout(recorderTimeout);
         delete this.recorder;
         reject(error);
       });
@@ -148,7 +153,7 @@ class Aperture {
       (async () => {
         try {
           await this.waitForEvent('onStart');
-          clearTimeout(timeout);
+          clearTimeout(recorderTimeout);
           setTimeout(resolve, 1000);
         } catch (error) {
           reject(error);
@@ -226,6 +231,15 @@ class Aperture {
     delete this.isFileReady;
 
     return this.tmpPath;
+  }
+
+  cancelRecording() {
+    if (this.recorder !== undefined) {
+      this.recorder.kill();
+      delete this.recorder;
+      delete this.isFileReady;
+      this.recorderTimeout && clearTimeout(this.recorderTimeout)
+    }
   }
 }
 
