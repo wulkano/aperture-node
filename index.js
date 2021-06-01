@@ -147,7 +147,7 @@ class Aperture {
 
       (async () => {
         try {
-          await this.waitForEvent('onStart');
+          await isFileReady;
           clearTimeout(timeout);
           setTimeout(resolve, 1000);
         } catch (error) {
