@@ -147,7 +147,7 @@ class Aperture {
 
       (async () => {
         try {
-          await isFileReady;
+          await this.isFileReady;
           clearTimeout(timeout);
           setTimeout(resolve, 1000);
         } catch (error) {
