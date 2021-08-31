@@ -1,6 +1,6 @@
 {
   "name": "aperture",
-  "version": "6.0.1",
+  "version": "6.0.2",
   "description": "Record the screen on macOS",
   "license": "MIT",
   "repository": "wulkano/aperture-node",
@@ -9,7 +9,7 @@
   },
   "scripts": {
     "test": "xo && ava && tsd",
-    "build": "swift build --configuration=release && mv .build/release/aperture .",
+    "build": "swift build --configuration=release && mv .build/release/aperture . && install_name_tool -delete_rpath /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx aperture",
     "prepublish": "npm run build"
   },
   "files": [
