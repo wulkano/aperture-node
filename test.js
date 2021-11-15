@@ -6,30 +6,30 @@ import fileType from 'file-type';
 import aperture from './index.js';
 
 test('returns audio devices', async t => {
-  const devices = await aperture.audioDevices();
-  console.log('Audio devices:', devices);
+	const devices = await aperture.audioDevices();
+	console.log('Audio devices:', devices);
 
-  t.true(Array.isArray(devices));
+	t.true(Array.isArray(devices));
 
-  if (devices.length > 0) {
-    t.true(devices[0].id.length > 0);
-    t.true(devices[0].name.length > 0);
-  }
+	if (devices.length > 0) {
+		t.true(devices[0].id.length > 0);
+		t.true(devices[0].name.length > 0);
+	}
 });
 
 test('returns available video codecs', t => {
-  const codecs = aperture.videoCodecs;
-  console.log('Video codecs:', codecs);
-  t.true(codecs.has('h264'));
+	const codecs = aperture.videoCodecs;
+	console.log('Video codecs:', codecs);
+	t.true(codecs.has('h264'));
 });
 
 test('records screen', async t => {
-  const recorder = aperture();
-  await recorder.startRecording();
-  t.true(fs.existsSync(await recorder.isFileReady));
-  await delay(1000);
-  const videoPath = await recorder.stopRecording();
-  t.true(fs.existsSync(videoPath));
-  t.is(fileType(readChunk.sync(videoPath, 0, 4100)).ext, 'mov');
-  fs.unlinkSync(videoPath);
+	const recorder = aperture();
+	await recorder.startRecording();
+	t.true(fs.existsSync(await recorder.isFileReady));
+	await delay(1000);
+	const videoPath = await recorder.stopRecording();
+	t.true(fs.existsSync(videoPath));
+	t.is(fileType(readChunkSync(videoPath, {length: 4100})).ext, 'mov');
+	fs.unlinkSync(videoPath);
 });

@@ -3,30 +3,32 @@ import Foundation
 // MARK: - SignalHandler
 struct SignalHandler {
   struct Signal: Hashable {
-    static let hangup = Signal(rawValue: SIGHUP)
-    static let interrupt = Signal(rawValue: SIGINT)
-    static let quit = Signal(rawValue: SIGQUIT)
-    static let abort = Signal(rawValue: SIGABRT)
-    static let kill = Signal(rawValue: SIGKILL)
-    static let alarm = Signal(rawValue: SIGALRM)
-    static let termination = Signal(rawValue: SIGTERM)
-    static let userDefined1 = Signal(rawValue: SIGUSR1)
-    static let userDefined2 = Signal(rawValue: SIGUSR2)
+	static let hangup = Signal(rawValue: SIGHUP)
+	static let interrupt = Signal(rawValue: SIGINT)
+	static let quit = Signal(rawValue: SIGQUIT)
+	static let abort = Signal(rawValue: SIGABRT)
+	static let kill = Signal(rawValue: SIGKILL)
+	static let alarm = Signal(rawValue: SIGALRM)
+	static let termination = Signal(rawValue: SIGTERM)
+	static let userDefined1 = Signal(rawValue: SIGUSR1)
+	static let userDefined2 = Signal(rawValue: SIGUSR2)
 
-    /// Signals that cause the process to exit
-    static let exitSignals = [
-      hangup,
-      interrupt,
-      quit,
-      abort,
-      alarm,
-      termination
-    ]
+	/**
+	Signals that cause the process to exit.
+	*/
+	static let exitSignals = [
+	  hangup,
+	  interrupt,
+	  quit,
+	  abort,
+	  alarm,
+	  termination
+	]
 
-    let rawValue: Int32
-    init(rawValue: Int32) {
-      self.rawValue = rawValue
-    }
+	let rawValue: Int32
+	init(rawValue: Int32) {
+	  self.rawValue = rawValue
+	}
   }
 
   typealias CSignalHandler = @convention(c) (Int32) -> Void
@@ -35,51 +37,59 @@ struct SignalHandler {
   private static var handlers = [Signal: [SignalHandler]]()
 
   private static var cHandler: CSignalHandler = { rawSignal in
-    let signal = Signal(rawValue: rawSignal)
+	let signal = Signal(rawValue: rawSignal)
 
-    guard let signalHandlers = handlers[signal] else {
-      return
-    }
+	guard let signalHandlers = handlers[signal] else {
+	  return
+	}
 
-    for handler in signalHandlers {
-      handler(signal)
-    }
+	for handler in signalHandlers {
+	  handler(signal)
+	}
   }
 
-  /// Handle some signals
+/**
+Handle some signals
+*/
   static func handle(signals: [Signal], handler: @escaping SignalHandler) {
-    for signal in signals {
-      // Since Swift has no way of running code on "struct creation", we need to initialize here…
-      if handlers[signal] == nil {
-        handlers[signal] = []
-      }
-      handlers[signal]?.append(handler)
+	for signal in signals {
+	  // Since Swift has no way of running code on "struct creation", we need to initialize here…
+	  if handlers[signal] == nil {
+		handlers[signal] = []
+	  }
+	  handlers[signal]?.append(handler)
 
-      var signalAction = sigaction(
-        __sigaction_u: unsafeBitCast(cHandler, to: __sigaction_u.self),
-        sa_mask: 0,
-        sa_flags: 0
-      )
+	  var signalAction = sigaction(
+		__sigaction_u: unsafeBitCast(cHandler, to: __sigaction_u.self),
+		sa_mask: 0,
+		sa_flags: 0
+	  )
 
-      _ = withUnsafePointer(to: &signalAction) { pointer in
-        sigaction(signal.rawValue, pointer, nil)
-      }
-    }
+	  _ = withUnsafePointer(to: &signalAction) { pointer in
+		sigaction(signal.rawValue, pointer, nil)
+	  }
+	}
   }
 
-  /// Raise a signal
+  /**
+  Raise a signal.
+  */
   static func raise(signal: Signal) {
-    _ = Darwin.raise(signal.rawValue)
+	_ = Darwin.raise(signal.rawValue)
   }
 
-  /// Ignore a signal
+  /**
+  Ignore a signal.
+  */
   static func ignore(signal: Signal) {
-    _ = Darwin.signal(signal.rawValue, SIG_IGN)
+	_ = Darwin.signal(signal.rawValue, SIG_IGN)
   }
 
-  /// Restore default signal handling
+  /**
+  Restore default signal handling.
+  */
   static func restore(signal: Signal) {
-    _ = Darwin.signal(signal.rawValue, SIG_DFL)
+	_ = Darwin.signal(signal.rawValue, SIG_DFL)
   }
 }
 
@@ -92,7 +102,7 @@ extension Array where Element == SignalHandler.Signal {
 // MARK: - CLI utils
 extension FileHandle: TextOutputStream {
   public func write(_ string: String) {
-    write(string.data(using: .utf8)!)
+	write(string.data(using: .utf8)!)
   }
 }
 
@@ -107,38 +117,44 @@ enum CLI {
 extension CLI {
   private static let once = Once()
 
-  /// Called when the process exits, either normally or forced (through signals)
-  /// When this is set, it's up to you to exit the process
+  /**
+  Called when the process exits, either normally or forced (through signals).
+
+  When this is set, it's up to you to exit the process.
+  */
   static var onExit: (() -> Void)? {
-    didSet {
-      guard let exitHandler = onExit else {
-        return
-      }
+	didSet {
+	  guard let exitHandler = onExit else {
+		return
+	  }
 
-      let handler = {
-        once.run(exitHandler)
-      }
+	  let handler = {
+		once.run(exitHandler)
+	  }
 
-      atexit_b {
-        handler()
-      }
+	  atexit_b {
+		handler()
+	  }
 
-      SignalHandler.handle(signals: .exitSignals) { _ in
-        handler()
-      }
-    }
+	  SignalHandler.handle(signals: .exitSignals) { _ in
+		handler()
+	  }
+	}
   }
 
-  /// Called when the process is being forced (through signals) to exit
-  /// When this is set, it's up to you to exit the process
-  static var onForcedExit: ((SignalHandler.Signal) -> Void)? {
-    didSet {
-      guard let exitHandler = onForcedExit else {
-        return
-      }
+  /**
+  Called when the process is being forced (through signals) to exit.
 
-      SignalHandler.handle(signals: .exitSignals, handler: exitHandler)
-    }
+  When this is set, it's up to you to exit the process.
+  */
+  static var onForcedExit: ((SignalHandler.Signal) -> Void)? {
+	didSet {
+	  guard let exitHandler = onForcedExit else {
+		return
+	  }
+
+	  SignalHandler.handle(signals: .exitSignals, handler: exitHandler)
+	}
   }
 }
 
@@ -147,8 +163,11 @@ enum PrintOutputTarget {
   case standardError
 }
 
-/// Make `print()` accept an array of items
-/// Since Swift doesn't support spreading...
+/**
+Make `print()` accept an array of items.
+
+Since Swift doesn't support spreading...
+*/
 private func print<Target>(
   _ items: [Any],
   separator: String = " ",
@@ -167,9 +186,9 @@ func print(
 ) {
   switch output {
   case .standardOutput:
-    print(items, separator: separator, terminator: terminator)
+	print(items, separator: separator, terminator: terminator)
   case .standardError:
-    print(items, separator: separator, terminator: terminator, to: &CLI.standardError)
+	print(items, separator: separator, terminator: terminator, to: &CLI.standardError)
   }
 }
 // MARK: -
@@ -193,13 +212,13 @@ final class Once {
 
   ```
   final class Foo {
-    private let once = Once()
+	private let once = Once()
 
-    func bar() {
-      once.run {
-        print("Called only once")
-      }
-    }
+	func bar() {
+	  once.run {
+		print("Called only once")
+	  }
+	}
   }
 
   let foo = Foo()
@@ -208,26 +227,26 @@ final class Once {
   ```
   */
   func run(_ closure: () -> Void) {
-    synchronized(lock: self) {
-      guard !hasRun else {
-        return
-      }
+	synchronized(lock: self) {
+	  guard !hasRun else {
+		return
+	  }
 
-      hasRun = true
-      closure()
-    }
+	  hasRun = true
+	  closure()
+	}
   }
 }
 
 extension Data {
   func jsonDecoded<T: Decodable>() throws -> T {
-    try JSONDecoder().decode(T.self, from: self)
+	try JSONDecoder().decode(T.self, from: self)
   }
 }
 
 extension String {
   func jsonDecoded<T: Decodable>() throws -> T {
-    try data(using: .utf8)!.jsonDecoded()
+	try data(using: .utf8)!.jsonDecoded()
   }
 }
 

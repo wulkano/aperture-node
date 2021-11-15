@@ -4,8 +4,8 @@
 
 ## Install
 
-```
-$ npm install aperture
+```sh
+npm install aperture
 ```
 
 *Requires macOS 10.13 or later.*
@@ -17,20 +17,20 @@ const delay = require('delay');
 const aperture = require('aperture')();
 
 const options = {
-  fps: 30,
-  cropArea: {
-    x: 100,
-    y: 100,
-    width: 500,
-    height: 500
-  }
+	fps: 30,
+	cropArea: {
+		x: 100,
+		y: 100,
+		width: 500,
+		height: 500
+	}
 };
 
 (async () => {
-  await aperture.startRecording(options);
-  await delay(3000);
-  console.log(await aperture.stopRecording());
-  //=> '/private/var/folders/3x/jf5977fn79jbglr7rk0tq4d00000gn/T/cdf4f7df426c97880f8c10a1600879f7.mp4'
+	await aperture.startRecording(options);
+	await delay(3000);
+	console.log(await aperture.stopRecording());
+	//=> '/private/var/folders/3x/jf5977fn79jbglr7rk0tq4d00000gn/T/cdf4f7df426c97880f8c10a1600879f7.mp4'
 })();
 ```
 
@@ -46,8 +46,8 @@ Example:
 
 ```js
 [{
-  id: 69732482,
-  name: 'Color LCD'
+	id: 69732482,
+	name: 'Color LCD'
 }]
 ```
 
@@ -59,8 +59,8 @@ Example:
 
 ```js
 [{
-  id: 'AppleHDAEngineInput:1B,0,1,0:1',
-  name: 'Built-in Microphone'
+	id: 'AppleHDAEngineInput:1B,0,1,0:1',
+	name: 'Built-in Microphone'
 }]
 ```
 
@@ -72,10 +72,10 @@ Example:
 
 ```js
 Map {
-  'h264' => 'H264',
-  'hevc' => 'HEVC',
-  'proRes422' => 'Apple ProRes 422',
-  'proRes4444' => 'Apple ProRes 4444'
+	'h264' => 'H264',
+	'hevc' => 'HEVC',
+	'proRes422' => 'Apple ProRes 422',
+	'proRes4444' => 'Apple ProRes 4444'
 }
 ```
 
