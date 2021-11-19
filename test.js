@@ -25,7 +25,7 @@ test('returns available video codecs', t => {
 
 test('records screen', async t => {
 	const recorder = aperture();
-	await recorder.startRecording({videoCodec: 'h264'});
+	await recorder.startRecording();
 	t.true(fs.existsSync(await recorder.isFileReady));
 	await delay(1000);
 	const videoPath = await recorder.stopRecording();

@@ -46,7 +46,7 @@ class Aperture {
 		highlightClicks = false,
 		screenId = 0,
 		audioDeviceId = undefined,
-		videoCodec = undefined
+		videoCodec = 'h264'
 	} = {}) {
 		this.processId = getRandomId();
 
