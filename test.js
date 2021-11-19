@@ -25,11 +25,11 @@ test('returns available video codecs', t => {
 
 test('records screen', async t => {
 	const recorder = aperture();
-	await recorder.startRecording();
+	await recorder.startRecording({videoCodec: 'h264'});
 	t.true(fs.existsSync(await recorder.isFileReady));
 	await delay(1000);
 	const videoPath = await recorder.stopRecording();
 	t.true(fs.existsSync(videoPath));
-	t.is(fileType(readChunkSync(videoPath, {length: 4100})).ext, 'mov');
+	t.is(fileType(readChunk.sync(videoPath, 0, 4100)).ext, 'mov');
 	fs.unlinkSync(videoPath);
 });
