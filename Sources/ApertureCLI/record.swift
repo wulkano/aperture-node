@@ -29,7 +29,6 @@ func record(_ optionsString: String, processId: String) throws {
 	)
 
 	recorder.onStart = {
-		ApertureEvents.sendEvent(processId: processId, event: OutEvent.onStart.rawValue)
 		ApertureEvents.sendEvent(processId: processId, event: OutEvent.onFileReady.rawValue)
 	}
 
@@ -81,6 +80,7 @@ func record(_ optionsString: String, processId: String) throws {
 	)
 
 	recorder.start()
+	ApertureEvents.sendEvent(processId: processId, event: OutEvent.onStart.rawValue)
 
 	RunLoop.main.run()
 }

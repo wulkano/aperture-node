@@ -109,6 +109,29 @@ class Aperture {
 				recorderOptions.videoCodec = codecMap.get(videoCodec);
 			}
 
+			const timeout = setTimeout(() => {
+				// `.stopRecording()` was called already
+				if (this.recorder === undefined) {
+					return;
+				}
+
+				const error = new Error('Could not start recording within 5 seconds');
+				error.code = 'RECORDER_TIMEOUT';
+				this.recorder.kill();
+				delete this.recorder;
+				reject(error);
+			}, 5000);
+
+			(async () => {
+				try {
+					await this.waitForEvent('onStart');
+					clearTimeout(timeout);
+					setTimeout(resolve, 1000);
+				} catch (error) {
+					reject(error);
+				}
+			})();
+
 			this.recorder = execa(
 				BIN, [
 					'record',
@@ -123,19 +146,6 @@ class Aperture {
 				return this.tmpPath;
 			})();
 
-			const timeout = setTimeout(() => {
-				// `.stopRecording()` was called already
-				if (this.recorder === undefined) {
-					return;
-				}
-
-				const error = new Error('Could not start recording within 5 seconds');
-				error.code = 'RECORDER_TIMEOUT';
-				this.recorder.kill();
-				delete this.recorder;
-				reject(error);
-			}, 5000);
-
 			this.recorder.catch(error => {
 				clearTimeout(timeout);
 				delete this.recorder;
@@ -144,16 +154,6 @@ class Aperture {
 
 			this.recorder.stdout.setEncoding('utf8');
 			this.recorder.stdout.on('data', log);
-
-			(async () => {
-				try {
-					await this.waitForEvent('onStart');
-					clearTimeout(timeout);
-					setTimeout(resolve, 1000);
-				} catch (error) {
-					reject(error);
-				}
-			})();
 		});
 	}
 
