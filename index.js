@@ -131,6 +131,11 @@ class Aperture {
 					reject(error);
 				}
 			})();
+			
+			this.isFileReady = (async () => {
+				await this.waitForEvent('onFileReady');
+				return this.tmpPath;
+			})();
 
 			this.recorder = execa(
 				BIN, [
@@ -140,11 +145,6 @@ class Aperture {
 					JSON.stringify(recorderOptions)
 				]
 			);
-
-			this.isFileReady = (async () => {
-				await this.waitForEvent('onFileReady');
-				return this.tmpPath;
-			})();
 
 			this.recorder.catch(error => {
 				clearTimeout(timeout);
