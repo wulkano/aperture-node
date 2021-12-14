@@ -109,20 +109,6 @@ class Aperture {
 				recorderOptions.videoCodec = codecMap.get(videoCodec);
 			}
 
-			this.recorder = execa(
-				BIN, [
-					'record',
-					'--process-id',
-					this.processId,
-					JSON.stringify(recorderOptions)
-				]
-			);
-
-			this.isFileReady = (async () => {
-				await this.waitForEvent('onFileReady');
-				return this.tmpPath;
-			})();
-
 			const timeout = setTimeout(() => {
 				// `.stopRecording()` was called already
 				if (this.recorder === undefined) {
@@ -136,15 +122,6 @@ class Aperture {
 				reject(error);
 			}, 5000);
 
-			this.recorder.catch(error => {
-				clearTimeout(timeout);
-				delete this.recorder;
-				reject(error);
-			});
-
-			this.recorder.stdout.setEncoding('utf8');
-			this.recorder.stdout.on('data', log);
-
 			(async () => {
 				try {
 					await this.waitForEvent('onStart');
@@ -154,6 +131,29 @@ class Aperture {
 					reject(error);
 				}
 			})();
+
+			this.isFileReady = (async () => {
+				await this.waitForEvent('onFileReady');
+				return this.tmpPath;
+			})();
+
+			this.recorder = execa(
+				BIN, [
+					'record',
+					'--process-id',
+					this.processId,
+					JSON.stringify(recorderOptions)
+				]
+			);
+
+			this.recorder.catch(error => {
+				clearTimeout(timeout);
+				delete this.recorder;
+				reject(error);
+			});
+
+			this.recorder.stdout.setEncoding('utf8');
+			this.recorder.stdout.on('data', log);
 		});
 	}
 
