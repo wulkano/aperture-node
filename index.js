@@ -131,7 +131,7 @@ class Aperture {
 					reject(error);
 				}
 			})();
-			
+
 			this.isFileReady = (async () => {
 				await this.waitForEvent('onFileReady');
 				return this.tmpPath;
