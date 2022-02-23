@@ -40,8 +40,12 @@ func record(_ optionsString: String, processId: String) throws {
 		ApertureEvents.sendEvent(processId: processId, event: OutEvent.onResume.rawValue)
 	}
 
-	recorder.onFinish = { error in
-		if let error = error {
+	recorder.onFinish = {
+		switch $0 {
+		case .success(_):
+			// TODO: Handle warning on the JS side.
+			break
+		case .failure(let error):
 			print(error, to: .standardError)
 			exit(1)
 		}
