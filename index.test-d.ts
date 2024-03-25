@@ -1,14 +1,12 @@
 import {expectType, expectError} from 'tsd';
-import {type Recorder, type Screen, type AudioDevice, type VideoCodec} from './index.js';
-import aperture from './index.js';
-
-const recorder = aperture();
+import type {Recorder, Screen, AudioDevice, VideoCodec} from './index.js';
+import {recorder, audioDevices, screens, videoCodecs} from './index.js';
 
 expectType<Recorder>(recorder);
 
-expectType<AudioDevice[]>(await aperture.audioDevices());
+expectType<AudioDevice[]>(await audioDevices());
 
-expectType<Screen[]>(await aperture.screens());
+expectType<Screen[]>(await screens());
 
 expectError(recorder.startRecording({videoCodec: 'random'}));
 
@@ -16,4 +14,4 @@ expectType<string | undefined>(await recorder.isFileReady);
 
 expectType<string>(await recorder.stopRecording());
 
-expectType<Map<VideoCodec, string>>(aperture.videoCodecs);
+expectType<Map<VideoCodec, string>>(videoCodecs());

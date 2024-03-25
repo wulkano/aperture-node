@@ -20,7 +20,8 @@ const supportsHevcHardwareEncoding = (() => {
 	const cpuModel = os.cpus()[0].model;
 
 	// All Apple silicon Macs support HEVC hardware encoding.
-	if (cpuModel.startsWith('Apple ')) { // Source string example: `'Apple M1'`
+	if (cpuModel.startsWith('Apple ')) {
+		// Source string example: `'Apple M1'`
 		return true;
 	}
 
@@ -35,7 +36,7 @@ const supportsHevcHardwareEncoding = (() => {
 	return result && Number.parseInt(result[1], 10) >= 6;
 })();
 
-class Aperture {
+class Recorder {
 	constructor() {
 		assertMacOSVersionGreaterThanOrEqualTo('10.13');
 	}
@@ -63,13 +64,12 @@ class Aperture {
 				showCursor = true;
 			}
 
-			if (typeof cropArea === 'object'
-				&& (
-					typeof cropArea.x !== 'number'
+			if (
+				typeof cropArea === 'object'
+				&& (typeof cropArea.x !== 'number'
 					|| typeof cropArea.y !== 'number'
 					|| typeof cropArea.width !== 'number'
-					|| typeof cropArea.height !== 'number'
-				)
+					|| typeof cropArea.height !== 'number')
 			) {
 				reject(new Error('Invalid `cropArea` option object'));
 				return;
@@ -138,14 +138,12 @@ class Aperture {
 				return this.tmpPath;
 			})();
 
-			this.recorder = execa(
-				BIN, [
-					'record',
-					'--process-id',
-					this.processId,
-					JSON.stringify(recorderOptions),
-				],
-			);
+			this.recorder = execa(BIN, [
+				'record',
+				'--process-id',
+				this.processId,
+				JSON.stringify(recorderOptions),
+			]);
 
 			this.recorder.catch(error => {
 				clearTimeout(timeout);
@@ -159,16 +157,14 @@ class Aperture {
 	}
 
 	async waitForEvent(name, parse) {
-		const {stdout} = await execa(
-			BIN, [
-				'events',
-				'listen',
-				'--process-id',
-				this.processId,
-				'--exit',
-				name,
-			],
-		);
+		const {stdout} = await execa(BIN, [
+			'events',
+			'listen',
+			'--process-id',
+			this.processId,
+			'--exit',
+			name,
+		]);
 
 		if (parse) {
 			return parse(stdout.trim());
@@ -176,15 +172,13 @@ class Aperture {
 	}
 
 	async sendEvent(name, parse) {
-		const {stdout} = await execa(
-			BIN, [
-				'events',
-				'send',
-				'--process-id',
-				this.processId,
-				name,
-			],
-		);
+		const {stdout} = await execa(BIN, [
+			'events',
+			'send',
+			'--process-id',
+			this.processId,
+			name,
+		]);
 
 		if (parse) {
 			return parse(stdout.trim());
@@ -229,10 +223,9 @@ class Aperture {
 	}
 }
 
-const aperture = () => new Aperture();
-export default aperture;
+export const recorder = new Recorder();
 
-const screens = async () => {
+export const screens = async () => {
 	const {stderr} = await execa(BIN, ['list', 'screens']);
 
 	try {
@@ -242,11 +235,7 @@ const screens = async () => {
 	}
 };
 
-Object.defineProperty(aperture, 'screens', {
-	value: screens,
-});
-
-const audioDevices = async () => {
+export const audioDevices = async () => {
 	const {stderr} = await execa(BIN, ['list', 'audio-devices']);
 
 	try {
@@ -255,10 +244,6 @@ const audioDevices = async () => {
 		return stderr;
 	}
 };
-
-Object.defineProperty(aperture, 'audioDevices', {
-	value: audioDevices,
-});
 
 const codecs = new Map([
 	['h264', 'H264'],
@@ -271,6 +256,4 @@ if (!supportsHevcHardwareEncoding) {
 	codecs.delete('hevc');
 }
 
-Object.defineProperty(aperture, 'videoCodecs', {
-	value: codecs,
-});
+export const videoCodecs = codecs;
