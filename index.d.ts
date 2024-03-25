@@ -63,7 +63,7 @@ declare namespace aperture {
 		readonly videoCodec?: VideoCodec;
 	};
 
-	interface Recorder {
+	type Recorder = {
 		/**
 		Returns a `Promise` that fullfills when the recording starts or rejects if the recording didn't start after 5 seconds.
 		*/
@@ -101,7 +101,7 @@ declare namespace aperture {
 		Returns a `Promise` for the path to the screen recording file.
 		*/
 		stopRecording: () => Promise<string>;
-	}
+	};
 }
 
 declare const aperture: (() => aperture.Recorder) & {

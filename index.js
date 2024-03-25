@@ -1,17 +1,18 @@
-'use strict';
-const os = require('os');
-const {debuglog} = require('util');
-const path = require('path');
-const execa = require('execa');
-const tempy = require('tempy');
-const macosVersion = require('macos-version');
-const fileUrl = require('file-url');
-const electronUtil = require('electron-util/node');
-const delay = require('delay');
+import os from 'node:os';
+import {debuglog} from 'node:util';
+import path from 'node:path';
+import url from 'node:url';
+import {execa} from 'execa';
+import {temporaryFile} from 'tempy';
+import {assertMacOSVersionGreaterThanOrEqualTo} from 'macos-version';
+import fileUrl from 'file-url';
+import electronUtil from 'electron-util/node.js';
+import delay from 'delay';
 
 const log = debuglog('aperture');
 const getRandomId = () => Math.random().toString(36).slice(2, 15);
 
+const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 // Workaround for https://github.com/electron/electron/issues/9459
 const BIN = path.join(electronUtil.fixPathForAsarUnpack(__dirname), 'aperture');
 
@@ -36,7 +37,7 @@ const supportsHevcHardwareEncoding = (() => {
 
 class Aperture {
 	constructor() {
-		macosVersion.assertGreaterThanOrEqualTo('10.13');
+		assertMacOSVersionGreaterThanOrEqualTo('10.13');
 	}
 
 	startRecording({
@@ -46,7 +47,7 @@ class Aperture {
 		highlightClicks = false,
 		screenId = 0,
 		audioDeviceId = undefined,
-		videoCodec = 'h264'
+		videoCodec = 'h264',
 	} = {}) {
 		this.processId = getRandomId();
 
@@ -56,18 +57,18 @@ class Aperture {
 				return;
 			}
 
-			this.tmpPath = tempy.file({extension: 'mp4'});
+			this.tmpPath = temporaryFile({extension: 'mp4'});
 
 			if (highlightClicks === true) {
 				showCursor = true;
 			}
 
-			if (typeof cropArea === 'object' &&
-				(
-					typeof cropArea.x !== 'number' ||
-					typeof cropArea.y !== 'number' ||
-					typeof cropArea.width !== 'number' ||
-					typeof cropArea.height !== 'number'
+			if (typeof cropArea === 'object'
+				&& (
+					typeof cropArea.x !== 'number'
+					|| typeof cropArea.y !== 'number'
+					|| typeof cropArea.width !== 'number'
+					|| typeof cropArea.height !== 'number'
 				)
 			) {
 				reject(new Error('Invalid `cropArea` option object'));
@@ -80,13 +81,13 @@ class Aperture {
 				showCursor,
 				highlightClicks,
 				screenId,
-				audioDeviceId
+				audioDeviceId,
 			};
 
 			if (cropArea) {
 				recorderOptions.cropRect = [
 					[cropArea.x, cropArea.y],
-					[cropArea.width, cropArea.height]
+					[cropArea.width, cropArea.height],
 				];
 			}
 
@@ -95,7 +96,7 @@ class Aperture {
 					['h264', 'avc1'],
 					['hevc', 'hvc1'],
 					['proRes422', 'apcn'],
-					['proRes4444', 'ap4h']
+					['proRes4444', 'ap4h'],
 				]);
 
 				if (!supportsHevcHardwareEncoding) {
@@ -142,8 +143,8 @@ class Aperture {
 					'record',
 					'--process-id',
 					this.processId,
-					JSON.stringify(recorderOptions)
-				]
+					JSON.stringify(recorderOptions),
+				],
 			);
 
 			this.recorder.catch(error => {
@@ -165,8 +166,8 @@ class Aperture {
 				'--process-id',
 				this.processId,
 				'--exit',
-				name
-			]
+				name,
+			],
 		);
 
 		if (parse) {
@@ -181,8 +182,8 @@ class Aperture {
 				'send',
 				'--process-id',
 				this.processId,
-				name
-			]
+				name,
+			],
 		);
 
 		if (parse) {
@@ -228,9 +229,10 @@ class Aperture {
 	}
 }
 
-module.exports = () => new Aperture();
+const aperture = () => new Aperture();
+export default aperture;
 
-module.exports.screens = async () => {
+const screens = async () => {
 	const {stderr} = await execa(BIN, ['list', 'screens']);
 
 	try {
@@ -240,7 +242,11 @@ module.exports.screens = async () => {
 	}
 };
 
-module.exports.audioDevices = async () => {
+Object.defineProperty(aperture, 'screens', {
+	value: screens,
+});
+
+const audioDevices = async () => {
 	const {stderr} = await execa(BIN, ['list', 'audio-devices']);
 
 	try {
@@ -250,19 +256,21 @@ module.exports.audioDevices = async () => {
 	}
 };
 
-Object.defineProperty(module.exports, 'videoCodecs', {
-	get() {
-		const codecs = new Map([
-			['h264', 'H264'],
-			['hevc', 'HEVC'],
-			['proRes422', 'Apple ProRes 422'],
-			['proRes4444', 'Apple ProRes 4444']
-		]);
+Object.defineProperty(aperture, 'audioDevices', {
+	value: audioDevices,
+});
 
-		if (!supportsHevcHardwareEncoding) {
-			codecs.delete('hevc');
-		}
+const codecs = new Map([
+	['h264', 'H264'],
+	['hevc', 'HEVC'],
+	['proRes422', 'Apple ProRes 422'],
+	['proRes4444', 'Apple ProRes 4444'],
+]);
 
-		return codecs;
-	}
+if (!supportsHevcHardwareEncoding) {
+	codecs.delete('hevc');
+}
+
+Object.defineProperty(aperture, 'videoCodecs', {
+	value: codecs,
 });

@@ -5,8 +5,10 @@
 	"license": "MIT",
 	"repository": "wulkano/aperture-node",
 	"engines": {
-		"node": ">=10"
+		"node": ">=16"
 	},
+	"type": "module",
+	"exports": "./index.js",
 	"scripts": {
 		"test": "xo && ava && tsd",
 		"build": "swift build --configuration=release --arch arm64 --arch x86_64 && mv .build/apple/Products/Release/aperture .",
@@ -18,18 +20,18 @@
 		"index.d.ts"
 	],
 	"dependencies": {
-		"delay": "^5.0.0",
-		"electron-util": "^0.14.2",
-		"execa": "^5.0.0",
-		"file-url": "^3.0.0",
-		"macos-version": "^5.2.1",
-		"tempy": "^1.0.0"
+		"delay": "^6.0.0",
+		"electron-util": "^0.17.2",
+		"execa": "^8.0.1",
+		"file-url": "^4.0.0",
+		"macos-version": "^6.0.0",
+		"tempy": "^3.1.0"
 	},
 	"devDependencies": {
-		"ava": "^2.4.0",
-		"file-type": "^12.0.0",
-		"read-chunk": "^3.2.0",
-		"tsd": "^0.14.0",
-		"xo": "^0.38.2"
+		"ava": "^5.3.1",
+		"file-type": "^18.7.0",
+		"read-chunk": "^4.0.0",
+		"tsd": "^0.30.7",
+		"xo": "^0.56.0"
 	}
 }

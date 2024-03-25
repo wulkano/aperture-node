@@ -5,18 +5,17 @@ on:
 jobs:
   test:
     name: Node.js ${{ matrix.node-version }}
-    runs-on: macos-11
+    runs-on: macos-latest
     strategy:
       fail-fast: false
       matrix:
         node-version:
+          - 20
+          - 18
           - 16
-          - 14
-          - 12
-          - 10
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
       - run: npm install

@@ -1,8 +1,8 @@
-import fs from 'fs';
+import fs from 'node:fs';
 import test from 'ava';
 import delay from 'delay';
-import readChunk from 'read-chunk';
-import fileType from 'file-type';
+import {fileTypeFromBuffer} from 'file-type';
+import {readChunk} from 'read-chunk';
 import aperture from './index.js';
 
 test('returns audio devices', async t => {
@@ -30,6 +30,8 @@ test('records screen', async t => {
 	await delay(1000);
 	const videoPath = await recorder.stopRecording();
 	t.true(fs.existsSync(videoPath));
-	t.is(fileType(readChunk.sync(videoPath, 0, 4100)).ext, 'mov');
+	const buffer = await readChunk(videoPath, {length: 4100});
+	const fileType = await fileTypeFromBuffer(buffer);
+	t.is(fileType.ext, 'mov');
 	fs.unlinkSync(videoPath);
 });

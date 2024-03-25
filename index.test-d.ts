@@ -1,7 +1,6 @@
 import {expectType, expectError} from 'tsd';
-import {Recorder, Screen, AudioDevice, VideoCodec} from './index.js';
-
-import aperture = require('./index.js');
+import {type Recorder, type Screen, type AudioDevice, type VideoCodec} from './index.js';
+import aperture from './index.js';
 
 const recorder = aperture();
 
