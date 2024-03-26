@@ -26,15 +26,15 @@ const options = {
 	},
 };
 
-(async () => {
-	await recorder.startRecording(options);
-	await setTimeout(3000);
-	console.log(await recorder.stopRecording());
-	//=> '/private/var/folders/3x/jf5977fn79jbglr7rk0tq4d00000gn/T/cdf4f7df426c97880f8c10a1600879f7.mp4'
-})();
+await recorder.startRecording(options);
+
+await setTimeout(3000);
+
+console.log(await recorder.stopRecording());
+//=> '/private/var/folders/3x/jf5977fn79jbglr7rk0tq4d00000gn/T/cdf4f7df426c97880f8c10a1600879f7.mp4'
 ```
 
-See [`example.js`](example.js) if you want to quickly try it out. _(The example requires Node.js 16+)_
+See [`example.js`](example.js) if you want to quickly try it out. _(The example requires Node.js 18+)_
 
 ## API
 
