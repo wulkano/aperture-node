@@ -4,11 +4,15 @@
 	"description": "Record the screen on macOS",
 	"license": "MIT",
 	"repository": "wulkano/aperture-node",
-	"engines": {
-		"node": ">=16"
-	},
 	"type": "module",
-	"exports": "./index.js",
+	"exports": {
+		"types": "./index.d.ts",
+		"default": "./index.js"
+	},
+	"sideEffects": false,
+	"engines": {
+		"node": ">=18"
+	},
 	"scripts": {
 		"test": "xo && ava && tsd",
 		"build": "swift build --configuration=release --arch arm64 --arch x86_64 && mv .build/apple/Products/Release/aperture .",
