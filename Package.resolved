@@ -1,25 +1,23 @@
 {
-  "object": {
-    "pins": [
-      {
-        "package": "Aperture",
-        "repositoryURL": "https://github.com/wulkano/Aperture",
-        "state": {
-          "branch": null,
-          "revision": "ddfb0fc1b3c789339dd5fd9296ba8076d292611c",
-          "version": "2.0.1"
-        }
-      },
-      {
-        "package": "swift-argument-parser",
-        "repositoryURL": "https://github.com/apple/swift-argument-parser",
-        "state": {
-          "branch": null,
-          "revision": "82905286cc3f0fa8adc4674bf49437cab65a8373",
-          "version": "1.1.1"
-        }
+  "pins" : [
+    {
+      "identity" : "aperture",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/wulkano/Aperture",
+      "state" : {
+        "revision" : "ddfb0fc1b3c789339dd5fd9296ba8076d292611c",
+        "version" : "2.0.1"
       }
-    ]
-  },
-  "version": 1
+    },
+    {
+      "identity" : "swift-argument-parser",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-argument-parser",
+      "state" : {
+        "revision" : "46989693916f56d1186bd59ac15124caef896560",
+        "version" : "1.3.1"
+      }
+    }
+  ],
+  "version" : 2
 }

@@ -22,8 +22,8 @@ final class ApertureNotification {
 		isAnswered = true
 
 		guard
-		let responseIdentifier: String = getField("responseIdentifier")
-	else {
+			let responseIdentifier: String = getField("responseIdentifier")
+		else {
 			return
 		}
 
@@ -48,7 +48,7 @@ enum ApertureEvents {
 		event: String,
 		using handler: @escaping (ApertureNotification) -> Void
 	) -> NSObjectProtocol {
-	DistributedNotificationCenter.default().addObserver(
+		DistributedNotificationCenter.default().addObserver(
 			forName: .init(ApertureNotification.notificationName(forEvent: event, processId: processId)),
 			object: nil,
 			queue: nil
@@ -59,7 +59,7 @@ enum ApertureEvents {
 			if !apertureNotification.isAnswered {
 				apertureNotification.answer()
 			}
-	}
+		}
 	}
 
 	static func sendEvent(
@@ -78,7 +78,6 @@ enum ApertureEvents {
 		}
 
 		var observer: AnyObject?
-
 		observer = DistributedNotificationCenter.default().addObserver(
 			forName: .init(responseIdentifier),
 			object: nil,
@@ -104,10 +103,10 @@ enum ApertureEvents {
 		using callback: @escaping (ApertureNotification) -> Void
 	) {
 		sendEvent(
-				processId: processId,
-				event: event,
-				data: nil,
-				using: callback
+			processId: processId,
+			event: event,
+			data: nil,
+			using: callback
 		)
 	}
 
@@ -117,9 +116,9 @@ enum ApertureEvents {
 		data: Any? = nil
 	) {
 		sendEvent(
-				processId: processId,
-				event: event,
-				data: data
+			processId: processId,
+			event: event,
+			data: data
 		) { _ in }
 	}
 }

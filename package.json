@@ -25,17 +25,17 @@
 	],
 	"dependencies": {
 		"delay": "^6.0.0",
-		"electron-util": "^0.17.2",
+		"electron-util": "^0.18.1",
 		"execa": "^8.0.1",
 		"file-url": "^4.0.0",
 		"macos-version": "^6.0.0",
 		"tempy": "^3.1.0"
 	},
 	"devDependencies": {
-		"ava": "^5.3.1",
-		"file-type": "^18.7.0",
-		"read-chunk": "^4.0.0",
+		"ava": "^6.1.2",
+		"file-type": "^19.0.0",
+		"read-chunk": "^4.0.3",
 		"tsd": "^0.30.7",
-		"xo": "^0.56.0"
+		"xo": "^0.58.0"
 	}
 }

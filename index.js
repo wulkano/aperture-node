@@ -6,15 +6,15 @@ import {execa} from 'execa';
 import {temporaryFile} from 'tempy';
 import {assertMacOSVersionGreaterThanOrEqualTo} from 'macos-version';
 import fileUrl from 'file-url';
-import electronUtil from 'electron-util/node.js';
+import {fixPathForAsarUnpack} from 'electron-util/node';
 import delay from 'delay';
 
 const log = debuglog('aperture');
 const getRandomId = () => Math.random().toString(36).slice(2, 15);
 
-const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
+const dirname_ = path.dirname(url.fileURLToPath(import.meta.url));
 // Workaround for https://github.com/electron/electron/issues/9459
-const BIN = path.join(electronUtil.fixPathForAsarUnpack(__dirname), 'aperture');
+const BINARY = path.join(fixPathForAsarUnpack(dirname_), 'aperture');
 
 const supportsHevcHardwareEncoding = (() => {
 	const cpuModel = os.cpus()[0].model;
@@ -138,7 +138,7 @@ class Recorder {
 				return this.tmpPath;
 			})();
 
-			this.recorder = execa(BIN, [
+			this.recorder = execa(BINARY, [
 				'record',
 				'--process-id',
 				this.processId,
@@ -157,7 +157,7 @@ class Recorder {
 	}
 
 	async waitForEvent(name, parse) {
-		const {stdout} = await execa(BIN, [
+		const {stdout} = await execa(BINARY, [
 			'events',
 			'listen',
 			'--process-id',
@@ -172,7 +172,7 @@ class Recorder {
 	}
 
 	async sendEvent(name, parse) {
-		const {stdout} = await execa(BIN, [
+		const {stdout} = await execa(BINARY, [
 			'events',
 			'send',
 			'--process-id',
@@ -225,27 +225,29 @@ class Recorder {
 
 export const recorder = new Recorder();
 
+const removeWarnings = string => string.split('\n').filter(line => !line.includes('] WARNING:')).join('\n');
+
 export const screens = async () => {
-	const {stderr} = await execa(BIN, ['list', 'screens']);
+	const {stderr} = await execa(BINARY, ['list', 'screens']);
 
 	try {
-		return JSON.parse(stderr);
-	} catch {
-		return stderr;
+		return JSON.parse(removeWarnings(stderr));
+	} catch (error) {
+		throw new Error(stderr, {cause: error});
 	}
 };
 
 export const audioDevices = async () => {
-	const {stderr} = await execa(BIN, ['list', 'audio-devices']);
+	const {stderr} = await execa(BINARY, ['list', 'audio-devices']);
 
 	try {
-		return JSON.parse(stderr);
-	} catch {
-		return stderr;
+		return JSON.parse(removeWarnings(stderr));
+	} catch (error) {
+		throw new Error(stderr, {cause: error});
 	}
 };
 
-const codecs = new Map([
+export const videoCodecs = new Map([
 	['h264', 'H264'],
 	['hevc', 'HEVC'],
 	['proRes422', 'Apple ProRes 422'],
@@ -253,7 +255,5 @@ const codecs = new Map([
 ]);
 
 if (!supportsHevcHardwareEncoding) {
-	codecs.delete('hevc');
+	videoCodecs.delete('hevc');
 }
-
-export const videoCodecs = codecs;

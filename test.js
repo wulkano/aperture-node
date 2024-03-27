@@ -3,7 +3,12 @@ import test from 'ava';
 import delay from 'delay';
 import {fileTypeFromBuffer} from 'file-type';
 import {readChunk} from 'read-chunk';
-import {recorder, audioDevices, screens, videoCodecs} from './index.js';
+import {
+	recorder,
+	audioDevices,
+	screens,
+	videoCodecs,
+} from './index.js';
 
 test('returns audio devices', async t => {
 	const devices = await audioDevices();

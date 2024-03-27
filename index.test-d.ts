@@ -1,6 +1,14 @@
 import {expectType, expectError} from 'tsd';
-import type {Recorder, Screen, AudioDevice, VideoCodec} from './index.js';
-import {recorder, audioDevices, screens, videoCodecs} from './index.js';
+import {
+	recorder,
+	audioDevices,
+	screens,
+	videoCodecs,
+	type Recorder,
+	type Screen,
+	type AudioDevice,
+	type VideoCodec,
+} from './index.js';
 
 expectType<Recorder>(recorder);
 

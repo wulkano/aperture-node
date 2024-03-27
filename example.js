@@ -1,6 +1,11 @@
 import fs from 'node:fs';
 import timers from 'node:timers/promises';
-import {recorder, screens, audioDevices, videoCodecs} from './index.js';
+import {
+	recorder,
+	screens,
+	audioDevices,
+	videoCodecs,
+} from './index.js';
 
 async function main() {
 	console.log('Screens:', await screens());
