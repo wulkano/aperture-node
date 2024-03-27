@@ -13,8 +13,8 @@ npm install aperture
 ## Usage
 
 ```js
-const delay = require('delay');
-const aperture = require('aperture')();
+import {setTimeout} from 'node:timers/promises';
+import {recorder} from 'aperture';
 
 const options = {
 	fps: 30,
@@ -22,49 +22,53 @@ const options = {
 		x: 100,
 		y: 100,
 		width: 500,
-		height: 500
-	}
+		height: 500,
+	},
 };
 
-(async () => {
-	await aperture.startRecording(options);
-	await delay(3000);
-	console.log(await aperture.stopRecording());
-	//=> '/private/var/folders/3x/jf5977fn79jbglr7rk0tq4d00000gn/T/cdf4f7df426c97880f8c10a1600879f7.mp4'
-})();
+await recorder.startRecording(options);
+
+await setTimeout(3000);
+
+console.log(await recorder.stopRecording());
+//=> '/private/var/folders/3x/jf5977fn79jbglr7rk0tq4d00000gn/T/cdf4f7df426c97880f8c10a1600879f7.mp4'
 ```
 
-See [`example.js`](example.js) if you want to quickly try it out. *(The example requires Node.js 8+)*
+See [`example.js`](example.js) if you want to quickly try it out. _(The example requires Node.js 18+)_
 
 ## API
 
-#### aperture.screens() -> `Promise<Object[]>`
+#### screens() -> `Promise<Object[]>`
 
 Get a list of screens. The first screen is the primary screen.
 
 Example:
 
 ```js
-[{
-	id: 69732482,
-	name: 'Color LCD'
-}]
+[
+	{
+		id: 69732482,
+		name: 'Color LCD',
+	},
+];
 ```
 
-#### aperture.audioDevices() -> `Promise<Object[]>`
+#### audioDevices() -> `Promise<Object[]>`
 
 Get a list of audio devices.
 
 Example:
 
 ```js
-[{
-	id: 'AppleHDAEngineInput:1B,0,1,0:1',
-	name: 'Built-in Microphone'
-}]
+[
+	{
+		id: 'AppleHDAEngineInput:1B,0,1,0:1',
+		name: 'Built-in Microphone',
+	},
+];
 ```
 
-#### aperture.videoCodecs -> `Map`
+#### videoCodecs -> `Map`
 
 Get a list of available video codecs. The key is the `videoCodec` option name and the value is the codec name. It only returns `hevc` if your computer supports HEVC hardware encoding.
 
@@ -79,7 +83,7 @@ Map {
 }
 ```
 
-#### recorder = `aperture()`
+#### recorder
 
 #### recorder.startRecording([options?](#options))
 
@@ -150,7 +154,7 @@ Enabling this will also enable the `showCursor` option.
 #### screenId
 
 Type: `number`\
-Default: `aperture.screens()[0]` *(Primary screen)*
+Default: `aperture.screens()[0]` _(Primary screen)_
 
 Screen to record.
 

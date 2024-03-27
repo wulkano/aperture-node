@@ -1,25 +1,27 @@
-'use strict';
-const fs = require('fs');
-const delay = require('delay');
-const aperture = require('.');
+import fs from 'node:fs';
+import timers from 'node:timers/promises';
+import {recorder, screens, audioDevices, videoCodecs} from './index.js';
 
 async function main() {
-	const recorder = aperture();
-	console.log('Screens:', await aperture.screens());
-	console.log('Audio devices:', await aperture.audioDevices());
-	console.log('Video codecs:', aperture.videoCodecs);
+	console.log('Screens:', await screens());
+	console.log('Audio devices:', await audioDevices());
+	console.log('Video codecs:', videoCodecs);
 
 	console.log('Preparing to record for 5 seconds');
 	await recorder.startRecording();
 	console.log('Recording started');
 	await recorder.isFileReady;
 	console.log('File is ready');
-	await delay(5000);
+	await timers.setTimeout(5000);
 	const fp = await recorder.stopRecording();
 	fs.renameSync(fp, 'recording.mp4');
 	console.log('Video saved in the current directory');
 }
 
-main().catch(console.error);
+try {
+	await main();
+} catch (error) {
+	console.error(error);
+}
 
 // Run: $ node example.js
