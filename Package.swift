@@ -4,7 +4,7 @@ import PackageDescription
 let package = Package(
 	name: "ApertureCLI",
 	platforms: [
-		.macOS(.v10_13)
+		.macOS(.v13)
 	],
 	products: [
 		.executable(
@@ -12,11 +12,17 @@ let package = Package(
 			targets: [
 				"ApertureCLI"
 			]
+		),
+		.library(
+			name: "aperture-module",
+			type: .dynamic,
+			targets: ["ApertureModule"]
 		)
 	],
 	dependencies: [
-		.package(url: "https://github.com/wulkano/Aperture", from: "2.0.1"),
-		.package(url: "https://github.com/apple/swift-argument-parser", from: "1.3.1")
+		.package(url: "https://github.com/wulkano/Aperture", branch: "george/rewrite-in-screen-capture-kit"),
+		.package(url: "https://github.com/apple/swift-argument-parser", from: "1.3.1"),
+		.package(path: "node_modules/node-swift")
 	],
 	targets: [
 		.executableTarget(
@@ -24,6 +30,14 @@ let package = Package(
 			dependencies: [
 				"Aperture",
 				.product(name: "ArgumentParser", package: "swift-argument-parser")
+			]
+		),
+		.target(
+			name: "ApertureModule",
+			dependencies: [
+				"Aperture",
+				.product(name: "NodeAPI", package: "node-swift"),
+				.product(name: "NodeModuleSupport", package: "node-swift")
 			]
 		)
 	]

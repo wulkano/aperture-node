@@ -5,5 +5,10 @@ xcuserdata
 /Packages
 /*.xcodeproj
 /aperture
+/aperture.node
 
 recording.mp4
+
+
+# SwiftLint Remote Config Cache
+.swiftlint/RemoteConfigCache

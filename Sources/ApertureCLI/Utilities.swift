@@ -260,3 +260,14 @@ func toJson<T>(_ data: T) throws -> String {
 	return String(data: json, encoding: .utf8)!
 }
 // MARK: -
+
+extension CGRect {
+	var asDictionary: [String: Any] {
+		[
+			"x": Int(origin.x),
+			"y": Int(origin.y),
+			"width": Int(size.width),
+			"height": Int(size.height)
+		]
+	}
+}

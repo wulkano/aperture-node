@@ -1,13 +1,13 @@
-import os from 'node:os';
 import {debuglog} from 'node:util';
 import path from 'node:path';
 import url from 'node:url';
 import {execa} from 'execa';
-import {temporaryFile} from 'tempy';
 import {assertMacOSVersionGreaterThanOrEqualTo} from 'macos-version';
-import fileUrl from 'file-url';
 import {fixPathForAsarUnpack} from 'electron-util/node';
 import delay from 'delay';
+import {normalizeOptions} from './common.js';
+
+export {videoCodecs} from './common.js';
 
 const log = debuglog('aperture');
 const getRandomId = () => Math.random().toString(36).slice(2, 15);
@@ -16,40 +16,55 @@ const dirname_ = path.dirname(url.fileURLToPath(import.meta.url));
 // Workaround for https://github.com/electron/electron/issues/9459
 const BINARY = path.join(fixPathForAsarUnpack(dirname_), 'aperture');
 
-const supportsHevcHardwareEncoding = (() => {
-	const cpuModel = os.cpus()[0].model;
-
-	// All Apple silicon Macs support HEVC hardware encoding.
-	if (cpuModel.startsWith('Apple ')) {
-		// Source string example: `'Apple M1'`
-		return true;
-	}
-
-	// Get the Intel Core generation, the `4` in `Intel(R) Core(TM) i7-4850HQ CPU @ 2.30GHz`
-	// More info: https://www.intel.com/content/www/us/en/processors/processor-numbers.html
-	// Example strings:
-	// - `Intel(R) Core(TM) i9-9980HK CPU @ 2.40GHz`
-	// - `Intel(R) Core(TM) i7-4850HQ CPU @ 2.30GHz`
-	const result = /Intel.*Core.*i\d+-(\d)/.exec(cpuModel);
-
-	// Intel Core generation 6 or higher supports HEVC hardware encoding
-	return result && Number.parseInt(result[1], 10) >= 6;
-})();
-
-class Recorder {
+export class Recorder {
 	constructor() {
-		assertMacOSVersionGreaterThanOrEqualTo('10.13');
+		assertMacOSVersionGreaterThanOrEqualTo('13');
 	}
 
-	startRecording({
-		fps = 30,
-		cropArea = undefined,
-		showCursor = true,
-		highlightClicks = false,
-		screenId = 0,
-		audioDeviceId = undefined,
-		videoCodec = 'h264',
-	} = {}) {
+	startRecordingScreen({
+		screenId,
+		...options
+	}) {
+		return this._startRecording('screen', {
+			...options,
+			targetId: screenId,
+		});
+	}
+
+	startRecordingWindow({
+		windowId,
+		...options
+	}) {
+		return this._startRecording('window', {
+			...options,
+			targetId: windowId,
+		});
+	}
+
+	startRecordingExternalDevice({
+		deviceId,
+		...options
+	}) {
+		return this._startRecording('externalDevice', {
+			...options,
+			targetId: deviceId,
+		});
+	}
+
+	startRecordingAudio({
+		audioDeviceId,
+		losslessAudio,
+		systemAudio,
+	}) {
+		return this._startRecording('audio', {
+			audioDeviceId,
+			losslessAudio,
+			systemAudio,
+			extension: 'm4a',
+		});
+	}
+
+	_startRecording(targetType, options) {
 		this.processId = getRandomId();
 
 		return new Promise((resolve, reject) => {
@@ -58,57 +73,9 @@ class Recorder {
 				return;
 			}
 
-			this.tmpPath = temporaryFile({extension: 'mp4'});
+			const {tmpPath, recorderOptions} = normalizeOptions(targetType, options);
 
-			if (highlightClicks === true) {
-				showCursor = true;
-			}
-
-			if (
-				typeof cropArea === 'object'
-				&& (typeof cropArea.x !== 'number'
-					|| typeof cropArea.y !== 'number'
-					|| typeof cropArea.width !== 'number'
-					|| typeof cropArea.height !== 'number')
-			) {
-				reject(new Error('Invalid `cropArea` option object'));
-				return;
-			}
-
-			const recorderOptions = {
-				destination: fileUrl(this.tmpPath),
-				framesPerSecond: fps,
-				showCursor,
-				highlightClicks,
-				screenId,
-				audioDeviceId,
-			};
-
-			if (cropArea) {
-				recorderOptions.cropRect = [
-					[cropArea.x, cropArea.y],
-					[cropArea.width, cropArea.height],
-				];
-			}
-
-			if (videoCodec) {
-				const codecMap = new Map([
-					['h264', 'avc1'],
-					['hevc', 'hvc1'],
-					['proRes422', 'apcn'],
-					['proRes4444', 'ap4h'],
-				]);
-
-				if (!supportsHevcHardwareEncoding) {
-					codecMap.delete('hevc');
-				}
-
-				if (!codecMap.has(videoCodec)) {
-					throw new Error(`Unsupported video codec specified: ${videoCodec}`);
-				}
-
-				recorderOptions.videoCodec = codecMap.get(videoCodec);
-			}
+			this.tmpPath = tmpPath;
 
 			const timeout = setTimeout(() => {
 				// `.stopRecording()` was called already
@@ -142,6 +109,8 @@ class Recorder {
 				'record',
 				'--process-id',
 				this.processId,
+				'--target-type',
+				targetType,
 				JSON.stringify(recorderOptions),
 			]);
 
@@ -237,6 +206,24 @@ export const screens = async () => {
 	}
 };
 
+export const windows = async ({
+	excludeDesktopWindows = true,
+	onScreenOnly = true,
+} = {}) => {
+	const {stderr} = await execa(BINARY, [
+		'list',
+		'windows',
+		excludeDesktopWindows ? '--exclude-desktop-windows' : '--no-exclude-desktop-windows',
+		onScreenOnly ? '--on-screen-only' : '--no-on-screen-only',
+	]);
+
+	try {
+		return JSON.parse(removeWarnings(stderr));
+	} catch (error) {
+		throw new Error(stderr, {cause: error});
+	}
+};
+
 export const audioDevices = async () => {
 	const {stderr} = await execa(BINARY, ['list', 'audio-devices']);
 
@@ -247,13 +234,12 @@ export const audioDevices = async () => {
 	}
 };
 
-export const videoCodecs = new Map([
-	['h264', 'H264'],
-	['hevc', 'HEVC'],
-	['proRes422', 'Apple ProRes 422'],
-	['proRes4444', 'Apple ProRes 4444'],
-]);
+export const externalDevices = async () => {
+	const {stderr} = await execa(BINARY, ['list', 'external-devices']);
 
-if (!supportsHevcHardwareEncoding) {
-	videoCodecs.delete('hevc');
-}
+	try {
+		return JSON.parse(removeWarnings(stderr));
+	} catch (error) {
+		throw new Error(stderr, {cause: error});
+	}
+};

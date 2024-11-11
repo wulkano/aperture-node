@@ -10,6 +10,13 @@ enum OutEvent: String, CaseIterable, ExpressibleByArgument {
 	case onFinish
 }
 
+enum TargetType: String, CaseIterable, ExpressibleByArgument {
+	case screen
+	case window
+	case audio
+	case externalDevice
+}
+
 enum InEvent: String, CaseIterable, ExpressibleByArgument {
 	case pause
 	case resume
@@ -40,7 +47,9 @@ extension ApertureCLI {
 		static let configuration = CommandConfiguration(
 			subcommands: [
 				Screens.self,
-				AudioDevices.self
+				AudioDevices.self,
+				Windows.self,
+				ExternalDevices.self
 			]
 		)
 	}
@@ -51,11 +60,23 @@ extension ApertureCLI {
 		@Option(name: .shortAndLong, help: "The ID to use for this process")
 		var processId = "main"
 
+		@Option(name: .shortAndLong, help: "The type of target to record")
+		var targetType = TargetType.screen
+
 		@Argument(help: "Stringified JSON object with options passed to Aperture")
 		var options: String
 
 		mutating func run() throws {
-			try record(options, processId: processId)
+			Task { [self] in
+				do {
+					try await record(options, processId: processId, targetType: targetType)
+				} catch {
+					print(error, to: .standardError)
+					Darwin.exit(1)
+				}
+			}
+
+			RunLoop.main.run()
 		}
 	}
 
@@ -75,8 +96,67 @@ extension ApertureCLI.List {
 		static let configuration = CommandConfiguration(abstract: "List available screens.")
 
 		mutating func run() throws {
-			// Uses stderr because of unrelated stuff being outputted on stdout.
-			print(try toJson(Aperture.Devices.screen().map { ["id": $0.id, "name": $0.name] }), to: .standardError)
+			Task {
+				// Uses stderr because of unrelated stuff being outputted on stdout.
+				print(
+					try toJson(
+						await Aperture.Devices.screen().map {
+							[
+								"id": $0.id,
+								"name": $0.name,
+								"width": $0.width,
+								"height": $0.height,
+								"frame": $0.frame.asDictionary
+							]
+						}
+					),
+					to: .standardError
+				)
+				Darwin.exit(0)
+			}
+
+			RunLoop.main.run()
+		}
+	}
+
+	struct Windows: ParsableCommand {
+		static let configuration = CommandConfiguration(abstract: "List available windows.")
+
+		@Flag(inversion: .prefixedNo, help: "Exclude desktop windows")
+		var excludeDesktopWindows = true
+
+		@Flag(inversion: .prefixedNo, help: "Only include windows that are on screen")
+		var onScreenOnly = true
+
+		mutating func run() throws {
+			Task { [self] in
+				// Uses stderr because of unrelated stuff being outputted on stdout.
+				print(
+					try toJson(
+						await Aperture.Devices.window(
+							excludeDesktopWindows: excludeDesktopWindows,
+							onScreenWindowsOnly: onScreenOnly
+						)
+						.map {
+							[
+								"id": $0.id,
+								"title": $0.title as Any,
+								"applicationName": $0.applicationName as Any,
+								"applicationBundleIdentifier": $0.applicationBundleIdentifier as Any,
+								"isActive": $0.isActive,
+								"isOnScreen": $0.isOnScreen,
+								"layer": $0.layer,
+								"frame": $0.frame.asDictionary
+							]
+						}
+					),
+					to: .standardError
+				)
+
+				Darwin.exit(0)
+			}
+
+			RunLoop.main.run()
 		}
 	}
 
@@ -86,6 +166,15 @@ extension ApertureCLI.List {
 		mutating func run() throws {
 			// Uses stderr because of unrelated stuff being outputted on stdout.
 			print(try toJson(Aperture.Devices.audio().map { ["id": $0.id, "name": $0.name] }), to: .standardError)
+		}
+	}
+
+	struct ExternalDevices: ParsableCommand {
+		static let configuration = CommandConfiguration(abstract: "List available external devices.")
+
+		mutating func run() throws {
+			// Uses stderr because of unrelated stuff being outputted on stdout.
+			print(try toJson(Aperture.Devices.iOS().map { ["id": $0.id, "name": $0.name] }), to: .standardError)
 		}
 	}
 }

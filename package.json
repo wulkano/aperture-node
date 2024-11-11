@@ -6,8 +6,14 @@
 	"repository": "wulkano/aperture-node",
 	"type": "module",
 	"exports": {
-		"types": "./index.d.ts",
-		"default": "./index.js"
+		".": {
+			"types": "./index.d.ts",
+			"default": "./index.js"
+		},
+		"./native": {
+			"types": "./index.d.ts",
+			"default": "./native.js"
+		}
 	},
 	"sideEffects": false,
 	"engines": {
@@ -15,13 +21,23 @@
 	},
 	"scripts": {
 		"test": "xo && ava && tsd",
-		"build": "swift build --configuration=release --arch arm64 --arch x86_64 && mv .build/apple/Products/Release/aperture .",
+		"build": "npm run build:cli && npm run build:module",
+		"build:cli": "npm run build:cli:build && npm run build:cli:move",
+		"build:cli:build": "swift build --configuration=release --product aperture --arch arm64 --arch x86_64",
+		"build:cli:move": "mv .build/apple/Products/Release/aperture .",
+		"build:module": "npm run build:module:build && npm run build:module:move && npm run build:module:sign",
+		"build:module:build": "swift build -c release --product aperture-module -Xlinker -undefined -Xlinker dynamic_lookup",
+		"build:module:move": "mv .build/arm64-apple-macosx/release/libaperture-module.dylib ./aperture.node",
+		"build:module:sign": "codesign -fs - ./aperture.node",
 		"prepublish": "npm run build"
 	},
 	"files": [
 		"index.js",
+		"index.d.ts",
+		"common.js",
+		"native.js",
 		"aperture",
-		"index.d.ts"
+		"aperture.node"
 	],
 	"dependencies": {
 		"delay": "^6.0.0",
@@ -34,8 +50,16 @@
 	"devDependencies": {
 		"ava": "^6.1.2",
 		"file-type": "^19.0.0",
+		"node-swift": "github:kabiroberai/node-swift#1.3.0",
 		"read-chunk": "^4.0.3",
 		"tsd": "^0.30.7",
+		"type-fest": "^4.26.1",
 		"xo": "^0.58.0"
+	},
+	"ava": {
+		"files": [
+			"test.js",
+			"native.test.js"
+		]
 	}
 }

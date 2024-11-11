@@ -3,30 +3,22 @@ import Aperture
 
 struct Options: Decodable {
 	let destination: URL
+	let targetId: String?
 	let framesPerSecond: Int
 	let cropRect: CGRect?
 	let showCursor: Bool
 	let highlightClicks: Bool
-	let screenId: CGDirectDisplayID
 	let audioDeviceId: String?
 	let videoCodec: String?
+	let losslessAudio: Bool
+	let recordSystemAudio: Bool
 }
 
-func record(_ optionsString: String, processId: String) throws {
-	setbuf(__stdoutp, nil)
+func record(_ optionsString: String, processId: String, targetType: TargetType) async throws {
 	let options: Options = try optionsString.jsonDecoded()
 	var observers = [Any]()
 
-	let recorder = try Aperture(
-		destination: options.destination,
-		framesPerSecond: options.framesPerSecond,
-		cropRect: options.cropRect,
-		showCursor: options.showCursor,
-		highlightClicks: options.highlightClicks,
-		screenId: options.screenId == 0 ? .main : options.screenId,
-		audioDevice: options.audioDeviceId != nil ? AVCaptureDevice(uniqueID: options.audioDeviceId!) : nil,
-		videoCodec: options.videoCodec != nil ? AVVideoCodecType(rawValue: options.videoCodec!) : nil
-	)
+	let recorder = Aperture.Recorder()
 
 	recorder.onStart = {
 		ApertureEvents.sendEvent(processId: processId, event: OutEvent.onFileReady.rawValue)
@@ -40,16 +32,12 @@ func record(_ optionsString: String, processId: String) throws {
 		ApertureEvents.sendEvent(processId: processId, event: OutEvent.onResume.rawValue)
 	}
 
-	recorder.onFinish = {
-		switch $0 {
-		case .success(_):
-			// TODO: Handle warning on the JS side.
-			break
-		case .failure(let error):
-			print(error, to: .standardError)
-			exit(1)
-		}
+	recorder.onError = {
+		print($0, to: .standardError)
+		exit(1)
+	}
 
+	recorder.onFinish = {
 		ApertureEvents.sendEvent(processId: processId, event: OutEvent.onFinish.rawValue)
 
 		for observer in observers {
@@ -60,7 +48,9 @@ func record(_ optionsString: String, processId: String) throws {
 	}
 
 	CLI.onExit = {
-		recorder.stop()
+		Task {
+			try await recorder.stopRecording()
+		}
 		// Do not call `exit()` here as the video is not always done
 		// saving at this point and will be corrupted randomly
 	}
@@ -83,8 +73,41 @@ func record(_ optionsString: String, processId: String) throws {
 		}
 	)
 
-	recorder.start()
-	ApertureEvents.sendEvent(processId: processId, event: OutEvent.onStart.rawValue)
+	let videoCodec: Aperture.VideoCodec
+	if let videoCodecString = options.videoCodec {
+		videoCodec = try .fromRawValue(videoCodecString)
+	} else {
+		videoCodec = .h264
+	}
 
-	RunLoop.main.run()
+	let target: Aperture.Target
+
+	switch targetType {
+	case .screen:
+		target = .screen
+	case .window:
+		target = .window
+	case .audio:
+		target = .audioOnly
+	case .externalDevice:
+		target = .externalDevice
+	}
+
+	try await recorder.startRecording(
+		target: target,
+		options: Aperture.RecordingOptions(
+			destination: options.destination,
+			targetID: options.targetId,
+			framesPerSecond: options.framesPerSecond,
+			cropRect: options.cropRect,
+			showCursor: options.showCursor,
+			highlightClicks: options.highlightClicks,
+			videoCodec: videoCodec,
+			losslessAudio: options.losslessAudio,
+			recordSystemAudio: options.recordSystemAudio,
+			microphoneDeviceID: options.audioDeviceId != nil ? options.audioDeviceId : nil
+		)
+	)
+
+	ApertureEvents.sendEvent(processId: processId, event: OutEvent.onStart.rawValue)
 }

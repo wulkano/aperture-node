@@ -8,7 +8,7 @@ import {
 	audioDevices,
 	screens,
 	videoCodecs,
-} from './index.js';
+} from './native.js';
 
 test('returns audio devices', async t => {
 	const devices = await audioDevices();
