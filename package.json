@@ -21,7 +21,7 @@
 	},
 	"scripts": {
 		"test": "xo && ava && tsd",
-		"build": "npm run build:cli && npm run build:module",
+		"build": "npm run build:cli",
 		"build:cli": "npm run build:cli:build && npm run build:cli:move",
 		"build:cli:build": "swift build --configuration=release --product aperture --arch arm64 --arch x86_64",
 		"build:cli:move": "mv .build/apple/Products/Release/aperture .",

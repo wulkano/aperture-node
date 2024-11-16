@@ -2,7 +2,6 @@ name: Build
 
 on:
   push:
-  pull_request:
 
 jobs:
   build-arm:
@@ -14,7 +13,7 @@ jobs:
         with:
           node-version: '18'
       - name: Install dependencies
-        run: npm ci
+        run: npm install
       - name: Build arm artifact
         run: npm run build:module:arm
       - name: Upload arm artifact
@@ -32,7 +31,7 @@ jobs:
         with:
           node-version: '18'
       - name: Install dependencies
-        run: npm ci
+        run: npm install
       - name: Build x86 artifact
         run: npm run build:module:x86
       - name: Upload arm artifact
