@@ -1,6 +1,6 @@
 {
 	"name": "aperture",
-	"version": "7.0.0",
+	"version": "8.0.0",
 	"description": "Record the screen on macOS",
 	"license": "MIT",
 	"repository": "wulkano/aperture-node",
@@ -25,9 +25,11 @@
 		"build:cli": "npm run build:cli:build && npm run build:cli:move",
 		"build:cli:build": "swift build --configuration=release --product aperture --arch arm64 --arch x86_64",
 		"build:cli:move": "mv .build/apple/Products/Release/aperture .",
-		"build:module": "npm run build:module:build && npm run build:module:move && npm run build:module:sign",
+		"build:module:arm": "npm run build:module:build && npm run build:module:move:arm && npm run build:module:sign",
+		"build:module:x86": "npm run build:module:build && npm run build:module:move:x86 && npm run build:module:sign",
 		"build:module:build": "swift build -c release --product aperture-module -Xlinker -undefined -Xlinker dynamic_lookup",
-		"build:module:move": "mv .build/arm64-apple-macosx/release/libaperture-module.dylib ./aperture.node",
+		"build:module:move:arm": "mv .build/arm64-apple-macosx/release/libaperture-module.dylib ./aperture-arm.node",
+		"build:module:move:x86": "ls .build && mv .build/x86_64-apple-macosx/release/libaperture-module.dylib ./aperture-x86.node",
 		"build:module:sign": "codesign -fs - ./aperture.node",
 		"prepublish": "npm run build"
 	},

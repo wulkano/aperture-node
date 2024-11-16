@@ -47,14 +47,14 @@ import AVFoundation
 
 	@NodeActor
 	@NodeMethod
-	func pause() {
-		self.recorder.pause()
+	func pause() throws {
+		try self.recorder.pause()
 	}
 
 	@NodeActor
 	@NodeMethod
-	func resume() {
-		self.recorder.resume()
+	func resume() async throws {
+		try await self.recorder.resume()
 	}
 
 	@NodeActor

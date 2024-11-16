@@ -57,13 +57,15 @@ func record(_ optionsString: String, processId: String, targetType: TargetType) 
 
 	observers.append(
 		ApertureEvents.answerEvent(processId: processId, event: InEvent.pause.rawValue) { _ in
-			recorder.pause()
+			try? recorder.pause()
 		}
 	)
 
 	observers.append(
 		ApertureEvents.answerEvent(processId: processId, event: InEvent.resume.rawValue) { _ in
-			recorder.resume()
+			Task {
+				try? await recorder.resume()
+			}
 		}
 	)
 
