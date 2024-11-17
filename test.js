@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import os from 'node:os';
+import { execSync } from 'node:child_process';
 import test from 'ava';
 import delay from 'delay';
 import {fileTypeFromBuffer} from 'file-type';
@@ -12,6 +13,30 @@ import {
 } from './index.js';
 
 console.log(`Running on macOS ${os.arch()} ${os.version()}\n`);
+
+(() => {
+	let pid = process.pid;
+
+	const getParentPid = (pid) => {
+		return execSync(`ps -p ${pid} -o ppid=`).toString().trim();
+	}
+
+	const getCommand = (pid) => {
+		return execSync(`ps -p ${pid} -o command=`).toString().trim();
+	}
+
+	while(true) {
+		const parent = getParentPid(pid);
+
+		if (parent === '0' || parent === '1') {
+			const command = getCommand(pid);
+			console.log(`Command: ${command}\n\n`);
+			break;
+		}
+
+		pid = parent;
+	}
+})();
 
 test('returns audio devices', async t => {
 	const devices = await audioDevices();
