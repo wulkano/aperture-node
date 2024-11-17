@@ -4,7 +4,7 @@ import {normalizeOptions} from './utils.js';
 
 export {videoCodecs} from './utils.js';
 
-const nativeModule = createRequire(import.meta.url)('./build/aperture.framework/aperture.node');
+const nativeModule = createRequire(import.meta.url)('./build/aperture.framework/Versions/A/aperture.node');
 
 export class Recorder {
 	constructor() {
