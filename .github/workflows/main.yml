@@ -27,7 +27,7 @@ jobs:
           path: build
 
   test-intel:
-    # needs: [test]
+    needs: [test]
     name: Node.js ${{ matrix.node-version }} (Intel)
     runs-on: macos-13
     strategy:
