@@ -3,8 +3,6 @@ import Aperture
 import Foundation
 import AVFoundation
 
-
-
 @NodeClass final class Recorder {
 	@NodeActor
 	private var recorder: Aperture.Recorder

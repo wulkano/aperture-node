@@ -4,8 +4,7 @@ yarn.lock
 xcuserdata
 /Packages
 /*.xcodeproj
-/aperture
-/aperture.node
+/build
 
 recording.mp4
 

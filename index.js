@@ -1,20 +1,10 @@
-import {debuglog} from 'node:util';
-import path from 'node:path';
-import url from 'node:url';
-import {execa} from 'execa';
+import {createRequire} from 'node:module';
 import {assertMacOSVersionGreaterThanOrEqualTo} from 'macos-version';
-import {fixPathForAsarUnpack} from 'electron-util/node';
-import delay from 'delay';
-import {normalizeOptions} from './common.js';
+import {normalizeOptions} from './utils.js';
 
-export {videoCodecs} from './common.js';
+export {videoCodecs} from './utils.js';
 
-const log = debuglog('aperture');
-const getRandomId = () => Math.random().toString(36).slice(2, 15);
-
-const dirname_ = path.dirname(url.fileURLToPath(import.meta.url));
-// Workaround for https://github.com/electron/electron/issues/9459
-const BINARY = path.join(fixPathForAsarUnpack(dirname_), 'aperture');
+const nativeModule = createRequire(import.meta.url)('./build/aperture.framework/aperture.node');
 
 export class Recorder {
 	constructor() {
@@ -64,94 +54,50 @@ export class Recorder {
 		});
 	}
 
-	_startRecording(targetType, options) {
-		this.processId = getRandomId();
+	async _startRecording(targetType, options) {
+		if (this.recorder !== undefined) {
+			throw new Error('Call `.stopRecording()` first');
+		}
 
-		return new Promise((resolve, reject) => {
-			if (this.recorder !== undefined) {
-				reject(new Error('Call `.stopRecording()` first'));
-				return;
-			}
+		const {tmpPath, recorderOptions} = normalizeOptions(targetType, options);
 
-			const {tmpPath, recorderOptions} = normalizeOptions(targetType, options);
+		this.tmpPath = tmpPath;
+		this.recorder = new nativeModule.Recorder();
 
-			this.tmpPath = tmpPath;
-
-			const timeout = setTimeout(() => {
-				// `.stopRecording()` was called already
-				if (this.recorder === undefined) {
-					return;
-				}
-
-				const error = new Error('Could not start recording within 5 seconds');
-				error.code = 'RECORDER_TIMEOUT';
-				this.recorder.kill();
-				delete this.recorder;
-				reject(error);
-			}, 5000);
-
-			(async () => {
-				try {
-					await this.waitForEvent('onStart');
-					clearTimeout(timeout);
-					setTimeout(resolve, 1000);
-				} catch (error) {
-					reject(error);
-				}
-			})();
-
-			this.isFileReady = (async () => {
-				await this.waitForEvent('onFileReady');
-				return this.tmpPath;
-			})();
-
-			this.recorder = execa(BINARY, [
-				'record',
-				'--process-id',
-				this.processId,
-				'--target-type',
-				targetType,
-				JSON.stringify(recorderOptions),
-			]);
-
-			this.recorder.catch(error => {
-				clearTimeout(timeout);
-				delete this.recorder;
-				reject(error);
-			});
-
-			this.recorder.stdout.setEncoding('utf8');
-			this.recorder.stdout.on('data', log);
+		this.isFileReady = new Promise(resolve => {
+			this.recorder.onStart = () => {
+				resolve(this.tmpPath);
+			};
 		});
-	}
 
-	async waitForEvent(name, parse) {
-		const {stdout} = await execa(BINARY, [
-			'events',
-			'listen',
-			'--process-id',
-			this.processId,
-			'--exit',
-			name,
-		]);
+		const finalOptions = {
+			destination: tmpPath,
+			framesPerSecond: recorderOptions.framesPerSecond,
+			showCursor: recorderOptions.showCursor,
+			highlightClicks: recorderOptions.highlightClicks,
+			losslessAudio: recorderOptions.losslessAudio,
+			recordSystemAudio: recorderOptions.recordSystemAudio,
+		};
 
-		if (parse) {
-			return parse(stdout.trim());
+		if (recorderOptions.videoCodec) {
+			finalOptions.videoCodec = recorderOptions.videoCodec;
 		}
-	}
 
-	async sendEvent(name, parse) {
-		const {stdout} = await execa(BINARY, [
-			'events',
-			'send',
-			'--process-id',
-			this.processId,
-			name,
-		]);
-
-		if (parse) {
-			return parse(stdout.trim());
+		if (targetType === 'screen' && options.cropArea) {
+			finalOptions.cropRect = options.cropArea;
 		}
+
+		if (recorderOptions.targetId) {
+			finalOptions.targetId = recorderOptions.targetId;
+		}
+
+		if (recorderOptions.audioDeviceId) {
+			finalOptions.microphoneDeviceID = recorderOptions.audioDeviceId;
+		}
+
+		console.log(finalOptions);
+
+		await this.recorder.startRecording(targetType === 'audio' ? 'audioOnly' : targetType, finalOptions);
 	}
 
 	throwIfNotStarted() {
@@ -162,29 +108,23 @@ export class Recorder {
 
 	async pause() {
 		this.throwIfNotStarted();
-		await this.sendEvent('pause');
+		this.recorder.pause();
 	}
 
 	async resume() {
 		this.throwIfNotStarted();
-
-		await this.sendEvent('resume');
-
-		// It takes about 1s after the promise resolves for the recording to actually start
-		await delay(1000);
+		this.recorder.resume();
 	}
 
 	async isPaused() {
 		this.throwIfNotStarted();
-
-		return this.sendEvent('isPaused', value => value === 'true');
+		return this.recorder.isPaused();
 	}
 
 	async stopRecording() {
 		this.throwIfNotStarted();
+		await this.recorder.stopRecording();
 
-		this.recorder.kill();
-		await this.recorder;
 		delete this.recorder;
 		delete this.isFileReady;
 
@@ -194,52 +134,13 @@ export class Recorder {
 
 export const recorder = new Recorder();
 
-const removeWarnings = string => string.split('\n').filter(line => !line.includes('] WARNING:')).join('\n');
-
-export const screens = async () => {
-	const {stderr} = await execa(BINARY, ['list', 'screens']);
-
-	try {
-		return JSON.parse(removeWarnings(stderr));
-	} catch (error) {
-		throw new Error(stderr, {cause: error});
-	}
-};
+export const screens = async () => nativeModule.getScreens();
 
 export const windows = async ({
 	excludeDesktopWindows = true,
 	onScreenOnly = true,
-} = {}) => {
-	const {stderr} = await execa(BINARY, [
-		'list',
-		'windows',
-		excludeDesktopWindows ? '--exclude-desktop-windows' : '--no-exclude-desktop-windows',
-		onScreenOnly ? '--on-screen-only' : '--no-on-screen-only',
-	]);
+} = {}) => nativeModule.getWindows(excludeDesktopWindows, onScreenOnly);
 
-	try {
-		return JSON.parse(removeWarnings(stderr));
-	} catch (error) {
-		throw new Error(stderr, {cause: error});
-	}
-};
+export const audioDevices = async () => nativeModule.getAudioDevices();
 
-export const audioDevices = async () => {
-	const {stderr} = await execa(BINARY, ['list', 'audio-devices']);
-
-	try {
-		return JSON.parse(removeWarnings(stderr));
-	} catch (error) {
-		throw new Error(stderr, {cause: error});
-	}
-};
-
-export const externalDevices = async () => {
-	const {stderr} = await execa(BINARY, ['list', 'external-devices']);
-
-	try {
-		return JSON.parse(removeWarnings(stderr));
-	} catch (error) {
-		throw new Error(stderr, {cause: error});
-	}
-};
+export const externalDevices = async () => nativeModule.getIOSDevices();

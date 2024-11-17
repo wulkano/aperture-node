@@ -19,27 +19,19 @@
 	"engines": {
 		"node": ">=18"
 	},
+	"swift": { "builder": "xcode" },
 	"scripts": {
 		"test": "xo && ava && tsd",
-		"build": "npm run build:cli",
-		"build:cli": "npm run build:cli:build && npm run build:cli:move",
-		"build:cli:build": "swift build --configuration=release --product aperture --arch arm64 --arch x86_64",
-		"build:cli:move": "mv .build/apple/Products/Release/aperture .",
-		"build:module:arm": "npm run build:module:build && npm run build:module:move:arm && npm run build:module:sign",
-		"build:module:x86": "npm run build:module:build && npm run build:module:move:x86 && npm run build:module:sign",
-		"build:module:build": "swift build -c release --product aperture-module -Xlinker -undefined -Xlinker dynamic_lookup",
-		"build:module:move:arm": "mv .build/arm64-apple-macosx/release/libaperture-module.dylib ./aperture-arm.node",
-		"build:module:move:x86": "ls .build && mv .build/x86_64-apple-macosx/release/libaperture-module.dylib ./aperture-x86.node",
-		"build:module:sign": "codesign -fs - ./aperture.node",
+		"build": "npm run build:build && npm run build:move",
+		"build:build": "node-swift build",
+		"build:move": "rm -rf build && mkdir build && mv ./.build/release/aperture.framework ./build/aperture.framework && mv ./.build/release/NodeAPI.framework ./build/NodeAPI.framework",
 		"prepublish": "npm run build"
 	},
 	"files": [
 		"index.js",
 		"index.d.ts",
-		"common.js",
-		"native.js",
-		"aperture",
-		"aperture.node"
+		"utils.js",
+		"build"
 	],
 	"dependencies": {
 		"delay": "^6.0.0",
@@ -57,11 +49,5 @@
 		"tsd": "^0.30.7",
 		"type-fest": "^4.26.1",
 		"xo": "^0.58.0"
-	},
-	"ava": {
-		"files": [
-			"test.js",
-			"native.test.js"
-		]
 	}
 }
