@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import os from 'node:os';
 import test from 'ava';
 import delay from 'delay';
 import {fileTypeFromBuffer} from 'file-type';
@@ -9,6 +10,8 @@ import {
 	screens,
 	videoCodecs,
 } from './index.js';
+
+console.log(`Running on macOS ${os.arch()} ${os.version()}`);
 
 test('returns audio devices', async t => {
 	const devices = await audioDevices();
