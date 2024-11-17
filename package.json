@@ -25,7 +25,7 @@
 		"build": "npm run build:build && npm run build:move",
 		"build:build": "node-swift build",
 		"build:move": "rm -rf build && mkdir build && mv ./.build/release/aperture.framework ./build/aperture.framework && mv ./.build/release/NodeAPI.framework ./build/NodeAPI.framework",
-		"prepublish": "npm run build"
+		"prepack": "npm run build"
 	},
 	"files": [
 		"index.js",
