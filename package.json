@@ -21,7 +21,7 @@
 	},
 	"swift": { "builder": "xcode" },
 	"scripts": {
-		"test": "xo && ava && tsd",
+		"test": "ava && tsd",
 		"build": "npm run build:build && npm run build:move",
 		"build:build": "node-swift build",
 		"build:move": "rm -rf build && mkdir build && mv ./.build/release/aperture.framework ./build/aperture.framework && mv ./.build/release/NodeAPI.framework ./build/NodeAPI.framework",
