@@ -11,7 +11,7 @@ import {
 	videoCodecs,
 } from './index.js';
 
-console.log(`Running on macOS ${os.arch()} ${os.version()}`);
+console.log(`Running on macOS ${os.arch()} ${os.version()}\n`);
 
 test('returns audio devices', async t => {
 	const devices = await audioDevices();
