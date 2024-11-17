@@ -41,7 +41,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-      - run: sudo sqlite3 /Library/Application\ Support/com.apple.TCC/TCC.db "select * from access;" | grep kTCCServiceAccessibility
+      - run: sudo sqlite3 /Library/Application\ Support/com.apple.TCC/TCC.db "select * from access;" | grep kTCCServiceScreenCapture
+      - run: sudo sqlite3 /Library/Application\ Support/com.apple.TCC/TCC.db "select * from access;"
       # - run: npm install
       # - name: Download build
       #   uses: actions/download-artifact@v3
