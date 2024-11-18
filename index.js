@@ -4,7 +4,8 @@ import {normalizeOptions} from './utils.js';
 
 export {videoCodecs} from './utils.js';
 
-const nativeModule = createRequire(import.meta.url)('./build/aperture.framework/Versions/A/aperture.node');
+// const nativeModule = createRequire(import.meta.url)('./build/aperture.framework/Versions/A/aperture.node');
+const nativeModule = createRequire(import.meta.url)('./build/aperture.node');
 
 export class Recorder {
 	constructor() {
@@ -94,8 +95,6 @@ export class Recorder {
 		if (recorderOptions.audioDeviceId) {
 			finalOptions.microphoneDeviceID = recorderOptions.audioDeviceId;
 		}
-
-		console.log(finalOptions);
 
 		await this.recorder.startRecording(targetType === 'audio' ? 'audioOnly' : targetType, finalOptions);
 	}

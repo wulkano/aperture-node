@@ -19,12 +19,11 @@
 	"engines": {
 		"node": ">=18"
 	},
-	"swift": { "builder": "xcode" },
 	"scripts": {
 		"test": "ava && tsd",
 		"build": "npm run build:build && npm run build:move",
 		"build:build": "node-swift build",
-		"build:move": "rm -rf build && mkdir build && mv ./.build/release/aperture.framework ./build/aperture.framework && mv ./.build/release/NodeAPI.framework ./build/NodeAPI.framework",
+		"build:move": "rm -rf build && mkdir build && mv ./.build/release/aperture.node ./build/aperture.node && mv ./.build/release/libNodeAPI.dylib ./build/libNodeAPI.dylib",
 		"prepack": "npm run build"
 	},
 	"files": [
