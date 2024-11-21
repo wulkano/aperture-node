@@ -46,7 +46,7 @@ export class Recorder {
 		losslessAudio,
 		systemAudio,
 	}) {
-		return this._startRecording('audio', {
+		return this._startRecording('audioOnly', {
 			audioDeviceId,
 			losslessAudio,
 			systemAudio,
@@ -95,7 +95,7 @@ export class Recorder {
 			finalOptions.microphoneDeviceID = recorderOptions.audioDeviceId;
 		}
 
-		await this.recorder.startRecording(targetType === 'audio' ? 'audioOnly' : targetType, finalOptions);
+		await this.recorder.start(targetType, finalOptions);
 	}
 
 	throwIfNotStarted() {
@@ -121,7 +121,7 @@ export class Recorder {
 
 	async stopRecording() {
 		this.throwIfNotStarted();
-		await this.recorder.stopRecording();
+		await this.recorder.stop();
 
 		delete this.recorder;
 		delete this.isFileReady;

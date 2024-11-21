@@ -18,8 +18,8 @@ export type Screen = {
 export type Window = {
 	id: string;
 	title?: string;
-	applicationName?: string;
-	applicationBundleIdentifier?: string;
+	appName?: string;
+	appBundleIdentifier?: string;
 	isActive: boolean;
 	isOnScreen: boolean;
 	layer: number;

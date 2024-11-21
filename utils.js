@@ -55,7 +55,7 @@ export function normalizeOptions(targetType, {
 		recordSystemAudio: systemAudio,
 	};
 
-	if (videoCodec && targetType !== 'audio') {
+	if (videoCodec && targetType !== 'audioOnly') {
 		const codecMap = new Map([
 			['h264', ['mp4', 'mov', 'm4v']],
 			['hevc', ['mp4', 'mov', 'm4v']],
@@ -81,7 +81,7 @@ export function normalizeOptions(targetType, {
 	}
 
 	const temporaryPath = temporaryFile({
-		extension: targetType === 'audio' ? 'm4a' : extension,
+		extension: targetType === 'audioOnly' ? 'm4a' : extension,
 	});
 
 	recorderOptions.destination = fileUrl(temporaryPath);

@@ -18,7 +18,7 @@ import AVFoundation
 
 	@NodeActor
 	@NodeMethod
-	func startRecording(_ targetString: NodeString, _ options: NodeObject) async throws {
+	func start(_ targetString: NodeString, _ options: NodeObject) async throws {
 		let target: Aperture.Target
 
 		switch try targetString.string() {
@@ -34,13 +34,13 @@ import AVFoundation
 			throw try NodeError(code: nil, message: "Invalid value provided for target. screen, window, audioOnly or externalDevice expected.")
 		}
 
-		try await self.recorder.startRecording(target: target, options: options.asOptions())
+		try await self.recorder.start(target: target, options: options.asOptions())
 	}
 
 	@NodeActor
 	@NodeMethod
-	func stopRecording() async throws {
-		try await self.recorder.stopRecording()
+	func stop() async throws {
+		try await self.recorder.stop()
 	}
 
 	@NodeActor
@@ -280,8 +280,8 @@ extension Aperture.Devices.Window: @retroactive NodeValueConvertible {
 			"id": String(self.id),
 			"title": self.title,
 			"frame": self.frame.nodeValue(),
-			"applicationName": self.applicationName,
-			"applicationBundleIdentifier": self.applicationBundleIdentifier,
+			"appName": self.appName,
+			"appBundleIdentifier": self.appBundleIdentifier,
 			"isActive": self.isActive,
 			"isOnScreen": self.isOnScreen,
 			"layer": self.layer
