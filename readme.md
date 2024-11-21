@@ -8,15 +8,18 @@
 npm install aperture
 ```
 
-*Requires macOS 10.13 or later.*
+*Requires macOS 13 or later.*
 
 ## Usage
 
 ```js
 import {setTimeout} from 'node:timers/promises';
-import {recorder} from 'aperture';
+import {recorder, screens} from 'aperture';
+
+const allScreens = await screens();
 
 const options = {
+	screenId: allScreens[0].id,
 	fps: 30,
 	cropArea: {
 		x: 100,
@@ -26,7 +29,7 @@ const options = {
 	},
 };
 
-await recorder.startRecording(options);
+await recorder.startRecordingScreen(options);
 
 await setTimeout(3000);
 
@@ -38,7 +41,7 @@ See [`example.js`](example.js) if you want to quickly try it out. _(The example 
 
 ## API
 
-#### screens() -> `Promise<Object[]>`
+#### screens() -> `Promise<Screen[]>`
 
 Get a list of screens. The first screen is the primary screen.
 
@@ -47,13 +50,62 @@ Example:
 ```js
 [
 	{
-		id: 69732482,
+		id: '69732482',
 		name: 'Color LCD',
+		width: 1280,
+		height: 800,
+		frame: {
+			x: 0,
+			y: 0,
+			width: 1280,
+			height: 800
+		}
 	},
 ];
 ```
 
-#### audioDevices() -> `Promise<Object[]>`
+#### windows(options: WindowOptions) -> `Promise<Window[]>`
+
+Get a list of windows
+
+##### WindowOptions.excludeDesktopWindows
+
+Type: `Boolean`\
+Default: `true`
+
+Exclude desktop windows like Finder, Dock, and Desktop.
+
+##### WindowOptions.onScreenOnly
+
+Type: `Boolean`\
+Default: `true`
+
+Only include windows that are on screen.
+
+
+Example:
+
+```js
+[
+	{
+		id: '69732482',
+		title: 'Unicorn',
+		applicationName: 'Safari',
+		applicationBundleIdentifier: 'com.apple.Safari',
+		isActive: true,
+		isOnScreen: true,
+		layer: 0,
+		frame: {
+			x: 0,
+			y: 0,
+			width: 1280,
+			height: 800
+		}
+	}
+];
+```
+
+#### audioDevices() -> `Promise<AudioDevice[]>`
 
 Get a list of audio devices.
 
@@ -64,6 +116,21 @@ Example:
 	{
 		id: 'AppleHDAEngineInput:1B,0,1,0:1',
 		name: 'Built-in Microphone',
+	},
+];
+```
+
+#### externalDevices() -> `Promise<ExternalDevice[]>`
+
+Get a list of external devices.
+
+Example:
+
+```js
+[
+	{
+		id: '9eb08da55a14244bf8044bf0f75247d2cb9c364c',
+		name: 'iPad Pro'
 	},
 ];
 ```
@@ -83,11 +150,120 @@ Map {
 }
 ```
 
+#### Audio Recording Options
+
+##### audioDeviceId
+
+Type: `string`\
+Default: `undefined`
+
+Audio device to include in the screen recording. Should be one of the `id`'s from `aperture.audioDevices()`.
+
+##### losslessAudio
+
+Type: `boolean`\
+Default: `false`
+
+Record audio in a lossless format (ALAC). Uses lossy (AAC) otherwise.
+
+##### systemAudio
+
+Type: `boolean`\
+Default: `false`
+
+Record system audio.
+
+#### Video Recording Options
+
+##### fps
+
+Type: `number`\
+Default: `30`
+
+Number of frames per seconds.
+
+##### showCursor
+
+Type: `boolean`\
+Default: `true`
+
+Show the cursor in the screen recording.
+
+##### highlightClicks
+
+Type: `boolean`\
+Default: `false`
+
+Highlight cursor clicks in the screen recording.
+
+Enabling this will also enable the `showCursor` option.
+
+##### videoCodec
+
+Type: `string`\
+Default: `'h264'`\
+Values: `'hevc' | 'h264' | 'proRes422' | 'proRes4444'`
+
+A computer with Intel 6th generation processor or newer is strongly recommended for the `hevc` codec, as otherwise it will use software encoding, which only produces 3 FPS fullscreen recording.
+
+The [`proRes422` and `proRes4444`](https://documentation.apple.com/en/finalcutpro/professionalformatsandworkflows/index.html#chapter=10%26section=2%26tasks=true) codecs are uncompressed data. They will create huge files.
+
 #### recorder
 
-#### recorder.startRecording([options?](#options))
+#### recorder.startRecordingScreen(options)
 
-Returns a `Promise` that fullfills when the recording starts or rejects if the recording didn't start after 5 seconds.
+Returns a `Promise` that fullfills when the recording starts.
+
+Accepts all [video](#video-recording-options) and [audio](#audio-recording-options) options, along with
+
+##### screenId
+
+Type: `string`
+
+The id of the screen to record.
+
+Should be one of the `id`'s from `screens()`.
+
+##### cropArea
+
+Type: `object`\
+Default: `undefined`
+
+Record only an area of the screen. Accepts an object with `x`, `y`, `width`, `height` properties.
+
+#### recorder.startRecordingWindow(options)
+
+Returns a `Promise` that fullfills when the recording starts.
+
+Accepts all [video](#video-recording-options) and [audio](#audio-recording-options) options, along with
+
+##### windowId
+
+Type: `string`
+
+The id of the screen to record.
+
+Should be one of the `id`'s from `windows()`.
+
+#### recorder.startRecordingExternalDevice(options)
+
+Returns a `Promise` that fullfills when the recording starts.
+
+Accepts all [video](#video-recording-options) and [audio](#audio-recording-options) options, along with
+
+##### deviceId
+
+Type: `string`
+
+The id of the screen to record.
+
+Should be one of the `id`'s from `externalDevices()`.
+
+#### recorder.startRecordingAudio(options)
+
+Returns a `Promise` that fullfills when the recording starts.
+
+Accepts all [audio](#audio-recording-options) options
 
 #### recorder.isFileReady
 
@@ -116,64 +292,6 @@ Returns a `Promise` that resolves with a boolean indicating whether or not the r
 #### recorder.stopRecording()
 
 Returns a `Promise` for the path to the screen recording file.
-
-## Options
-
-Type: `object`
-
-#### fps
-
-Type: `number`\
-Default: `30`
-
-Number of frames per seconds.
-
-#### cropArea
-
-Type: `object`\
-Default: `undefined`
-
-Record only an area of the screen. Accepts an object with `x`, `y`, `width`, `height` properties.
-
-#### showCursor
-
-Type: `boolean`\
-Default: `true`
-
-Show the cursor in the screen recording.
-
-#### highlightClicks
-
-Type: `boolean`\
-Default: `false`
-
-Highlight cursor clicks in the screen recording.
-
-Enabling this will also enable the `showCursor` option.
-
-#### screenId
-
-Type: `number`\
-Default: `aperture.screens()[0]` _(Primary screen)_
-
-Screen to record.
-
-#### audioDeviceId
-
-Type: `string`\
-Default: `undefined`
-
-Audio device to include in the screen recording. Should be one of the `id`'s from `aperture.audioDevices()`.
-
-#### videoCodec
-
-Type: `string`\
-Default: `'h264'`\
-Values: `'hevc' | 'h264' | 'proRes422' | 'proRes4444'`
-
-A computer with Intel 6th generation processor or newer is strongly recommended for the `hevc` codec, as otherwise it will use software encoding, which only produces 3 FPS fullscreen recording.
-
-The [`proRes422` and `proRes4444`](https://documentation.apple.com/en/finalcutpro/professionalformatsandworkflows/index.html#chapter=10%26section=2%26tasks=true) codecs are uncompressed data. They will create huge files.
 
 ## Why
 
