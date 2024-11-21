@@ -245,8 +245,8 @@ Get a list of windows.
 [{
 	id: '69732482',
 	title: 'Unicorn',
-	applicationName: 'Safari',
-	applicationBundleIdentifier: 'com.apple.Safari',
+	appName: 'Safari',
+	appBundleIdentifier: 'com.apple.Safari',
 	isActive: true,
 	isOnScreen: true,
 	layer: 0,
