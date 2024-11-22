@@ -14,7 +14,7 @@ let package = Package(
 		)
 	],
 	dependencies: [
-		.package(url: "https://github.com/wulkano/Aperture", branch: "george/rewrite-in-screen-capture-kit"),
+		.package(url: "https://github.com/wulkano/Aperture", from: "3.0.0"),
 		.package(path: "node_modules/node-swift")
 	],
 	targets: [
