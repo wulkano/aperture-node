@@ -100,7 +100,7 @@ export class Recorder {
 
 	throwIfNotStarted() {
 		if (this.recorder === undefined) {
-			throw new Error('Call `.startRecording()` first');
+			throw new Error('Recording not started yet');
 		}
 	}
 

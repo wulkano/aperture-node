@@ -208,6 +208,23 @@ A computer with Intel 6th generation processor or newer is strongly recommended 
 
 The [`proRes422` and `proRes4444`](https://documentation.apple.com/en/finalcutpro/professionalformatsandworkflows/index.html#chapter=10%26section=2%26tasks=true) codecs are uncompressed data. They will create huge files.
 
+##### extension
+
+Type: `string`\
+Default:
+
+- `'m4a'` for [audio](#recorderstartrecordingaudiooptions) recordings
+- `'mov'` for `proRes422` and `proRes4444` video codecs
+- `'mp4'` otherwise
+
+Values:
+
+- `'m4a'` is the only valid option for [audio](#recorderstartrecordingaudiooptions) recordings
+- `'mov'` is the only valid option for `proRes422` and `proRes4444` video codecs
+- `'mp4' | 'm4v' | 'mov'` for all other video codecs
+
+The extension of the output file
+
 #### recorder
 
 #### recorder.startRecordingScreen(options)

@@ -80,6 +80,10 @@ export function normalizeOptions(targetType, {
 		recorderOptions.videoCodec = videoCodec;
 	}
 
+	if (targetType === 'audioOnly' && extension !== 'm4a') {
+		throw new Error('Audio recordings only supports the m4a extension');
+	}
+
 	const temporaryPath = temporaryFile({
 		extension: targetType === 'audioOnly' ? 'm4a' : extension,
 	});
