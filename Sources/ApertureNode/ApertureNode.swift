@@ -238,7 +238,7 @@ extension NodeObject {
 
 		return Aperture.RecordingOptions(
 			destination: destination,
-			targetID: try getAs("targetId", type: String.self),
+			targetID: try getAs("targetID", type: String.self),
 			framesPerSecond: try getAs("framesPerSecond", type: Int.self) ?? 60,
 			cropRect: try getAs("cropRect", type: NodeObject.self)?.asCGRect(),
 			showCursor: try getAs("showCursor", type: Bool.self) ?? true,

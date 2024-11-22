@@ -88,7 +88,7 @@ export class Recorder {
 		}
 
 		if (recorderOptions.targetId) {
-			finalOptions.targetId = recorderOptions.targetId;
+			finalOptions.targetID = recorderOptions.targetId;
 		}
 
 		if (recorderOptions.audioDeviceId) {
