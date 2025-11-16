@@ -1,21 +1,50 @@
 name: CI
 on:
   - push
-  - pull_request
+  # - pull_request
 jobs:
   test:
     name: Node.js ${{ matrix.node-version }}
-    runs-on: macos-14
+    runs-on: macos-15
     strategy:
       fail-fast: false
       matrix:
         node-version:
           - 20
-          - 18
+          # - 18
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
       - run: npm install
+      - run: npm run build
+      - run: npm test
+      - name: Upload build
+        uses: actions/upload-artifact@v4
+        with:
+          name: binding-artifact-${{ matrix.node-version }}
+          path: build
+
+  test-intel:
+    needs: [test]
+    name: Node.js ${{ matrix.node-version }} (Intel)
+    runs-on: macos-13
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version:
+          - 20
+          # - 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: npm install
+      - name: Download build
+        uses: actions/download-artifact@v4
+        with:
+          name: binding-artifact-${{ matrix.node-version }}
+          path: build
       - run: npm test

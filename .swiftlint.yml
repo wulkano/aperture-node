@@ -1,0 +1,6 @@
+parent_config: https://raw.githubusercontent.com/sindresorhus/swiftlint-config/main/.swiftlint.yml
+deployment_target:
+  macOS_deployment_target: '13'
+excluded:
+  - .build
+  - node_modules

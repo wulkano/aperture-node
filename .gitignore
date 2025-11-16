@@ -4,6 +4,10 @@ yarn.lock
 xcuserdata
 /Packages
 /*.xcodeproj
-/aperture
+/build
 
 recording.mp4
+
+
+# SwiftLint Remote Config Cache
+.swiftlint/RemoteConfigCache

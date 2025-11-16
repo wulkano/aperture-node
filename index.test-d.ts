@@ -16,7 +16,29 @@ expectType<AudioDevice[]>(await audioDevices());
 
 expectType<Screen[]>(await screens());
 
-expectError(recorder.startRecording({videoCodec: 'random'}));
+expectError(recorder.startRecordingScreen({}));
+
+expectError(recorder.startRecordingScreen({screenId: '1', videoCodec: 'random'}));
+
+expectError(recorder.startRecordingScreen({screenId: '1', videoCodec: 'proRes422', extension: 'mp4'}));
+
+expectType<Promise<void>>(recorder.startRecordingScreen({screenId: '1', videoCodec: 'proRes422', extension: 'mov'}));
+
+expectType<Promise<void>>(recorder.startRecordingScreen({screenId: '1', extension: 'mp4'}));
+
+expectType<Promise<void>>(recorder.startRecordingScreen({screenId: '1'}));
+
+expectError(recorder.startRecordingWindow({}));
+
+expectType<Promise<void>>(recorder.startRecordingWindow({windowId: '1'}));
+
+expectError(recorder.startRecordingExternalDevice({}));
+
+expectType<Promise<void>>(recorder.startRecordingExternalDevice({deviceId: '1'}));
+
+expectError(recorder.startRecordingAudio({losslessAudio: true}));
+
+expectType<Promise<void>>(recorder.startRecordingAudio({systemAudio: true, audioDeviceId: '1'}));
 
 expectType<string | undefined>(await recorder.isFileReady);
 

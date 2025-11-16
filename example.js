@@ -2,18 +2,20 @@ import fs from 'node:fs';
 import timers from 'node:timers/promises';
 import {
 	recorder,
-	screens,
-	audioDevices,
+	screens as getScreens,
+	audioDevices as getAudioDevices,
 	videoCodecs,
 } from './index.js';
 
 async function main() {
-	console.log('Screens:', await screens());
-	console.log('Audio devices:', await audioDevices());
+	const screens = await getScreens();
+	console.log('Screens:', screens);
+	const audioDevices = await getAudioDevices();
+	console.log('Audio devices:', audioDevices);
 	console.log('Video codecs:', videoCodecs);
 
 	console.log('Preparing to record for 5 seconds');
-	await recorder.startRecording();
+	await recorder.startRecordingScreen({screenId: screens[0].id, audioDeviceId: audioDevices[0].id});
 	console.log('Recording started');
 	await recorder.isFileReady;
 	console.log('File is ready');

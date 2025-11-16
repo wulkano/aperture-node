@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import os from 'node:os';
 import test from 'ava';
 import delay from 'delay';
 import {fileTypeFromBuffer} from 'file-type';
@@ -10,9 +11,10 @@ import {
 	videoCodecs,
 } from './index.js';
 
+console.log(`Running on macOS ${os.arch()} ${os.version()}\n`);
+
 test('returns audio devices', async t => {
 	const devices = await audioDevices();
-	console.log('Audio devices:', devices);
 
 	t.true(Array.isArray(devices));
 
@@ -24,7 +26,6 @@ test('returns audio devices', async t => {
 
 test('returns screens', async t => {
 	const monitors = await screens();
-	console.log('Screens:', monitors);
 
 	t.true(Array.isArray(monitors));
 
@@ -36,18 +37,26 @@ test('returns screens', async t => {
 
 test('returns available video codecs', t => {
 	const codecs = videoCodecs;
-	console.log('Video codecs:', codecs);
 	t.true(codecs.has('h264'));
 });
 
 test('records screen', async t => {
-	await recorder.startRecording();
+	if (os.arch() === 'x64') {
+		// The GH runner for x64 does not have screen capture permissions, so this fails
+		// The main purpose of the x64 runner is to make sure the binding if built correctly for cross-platform,
+		// so we are ok to skip this test
+		t.pass();
+		return;
+	}
+
+	const monitors = await screens();
+	await recorder.startRecordingScreen({screenId: monitors[0].id});
 	t.true(fs.existsSync(await recorder.isFileReady));
 	await delay(1000);
 	const videoPath = await recorder.stopRecording();
 	t.true(fs.existsSync(videoPath));
 	const buffer = await readChunk(videoPath, {length: 4100});
 	const fileType = await fileTypeFromBuffer(buffer);
-	t.is(fileType.ext, 'mov');
+	t.is(fileType.ext, 'mp4');
 	fs.unlinkSync(videoPath);
 });

@@ -2,28 +2,28 @@
 import PackageDescription
 
 let package = Package(
-	name: "ApertureCLI",
+	name: "aperture",
 	platforms: [
-		.macOS(.v10_13)
+		.macOS(.v13)
 	],
 	products: [
-		.executable(
+		.library(
 			name: "aperture",
-			targets: [
-				"ApertureCLI"
-			]
+			type: .dynamic,
+			targets: ["ApertureNode"]
 		)
 	],
 	dependencies: [
-		.package(url: "https://github.com/wulkano/Aperture", from: "2.0.1"),
-		.package(url: "https://github.com/apple/swift-argument-parser", from: "1.3.1")
+		.package(url: "https://github.com/wulkano/Aperture", from: "3.0.0"),
+		.package(path: "node_modules/node-swift")
 	],
 	targets: [
-		.executableTarget(
-			name: "ApertureCLI",
+		.target(
+			name: "ApertureNode",
 			dependencies: [
 				"Aperture",
-				.product(name: "ArgumentParser", package: "swift-argument-parser")
+				.product(name: "NodeAPI", package: "node-swift"),
+				.product(name: "NodeModuleSupport", package: "node-swift")
 			]
 		)
 	]
