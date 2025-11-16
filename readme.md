@@ -237,7 +237,7 @@ Accepts all [video](#video-recording-options) and [audio](#audio-recording-optio
 
 Type: `string`
 
-The id of the screen to record.
+The identifier of the screen to record.
 
 Should be one of the `id`'s from `screens()`.
 

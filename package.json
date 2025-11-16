@@ -6,10 +6,8 @@
 	"repository": "wulkano/aperture-node",
 	"type": "module",
 	"exports": {
-		".": {
-			"types": "./index.d.ts",
-			"default": "./index.js"
-		}
+		"types": "./index.d.ts",
+		"default": "./index.js"
 	},
 	"sideEffects": false,
 	"engines": {
